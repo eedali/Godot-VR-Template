@@ -114,7 +114,7 @@ jobs:
         run: |
           export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-          yes | sdkmanager --licenses > /dev/null
+          yes | sdkmanager --licenses > /dev/null || true
           sdkmanager \
             "platform-tools" \
             "build-tools;34.0.0" \
