@@ -1,3 +1,26 @@
 .import/
 .godot/
 android/
+# Build outputs (exported binaries are local only, see build/*/.gitignore)
+build/windows/*
+!build/windows/.gitignore
+build/linux/*
+!build/linux/.gitignore
+build/android-quest/*
+!build/android-quest/.gitignore
+build/android-pico/*
+!build/android-pico/.gitignore
+build/android-lynx/*
+!build/android-lynx/.gitignore
+build/android-khronos/*
+!build/android-khronos/.gitignore
+build/webxr/*
+!build/webxr/.gitignore
+# Logs & temp
+*.log
+*.tmp
+# Editor / OS leftovers
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
