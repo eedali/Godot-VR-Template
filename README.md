@@ -1,149 +1,150 @@
-# VRStudio XR Game — Godot VR Template (Quest 3 + Steam hazır)
+# VRStudio XR Game — Godot VR Template (Quest 3 + Steam ready)
 
-> Upstream: [godotVR/godot-xr-template](https://github.com/godotVR/godot-xr-template) (`main` kolu)
-> baz alınarak, **Meta Quest 3 öncelikli** ve **Steam PCVR** hedefli hazırlanmış çalışan
-> şablondur. Splash + start menüsü + 3 demo sahnesi ile gelir, tak-çalıştır test edilebilir.
+> Based on upstream [godotVR/godot-xr-template](https://github.com/godotVR/godot-xr-template)
+> (`main` branch), prepared with **Meta Quest 3 first** and **Steam PCVR** targets.
+> Ships with splash + start menu + 3 demo scenes, ready to run and test.
 
-| Hedef | Durum |
+| Target | Status |
 |---|---|
-| Quest 3 (APK, debug) | ✅ Derleniyor, cihaz testi seni bekliyor |
-| PC Windows (SteamVR uyumlu OpenXR) | ✅ Derleniyor |
-| Meta Store yayını (AAB, release imza) | ⬜ TODO (aşağıda) |
-| Steam yayını | ⬜ TODO (aşağıda) |
+| Quest 3 (APK, debug) | ✅ Builds, on-device test pending on your side |
+| PC Windows (SteamVR-compatible OpenXR) | ✅ Builds |
+| Meta Store release (AAB, release signature) | ⬜ TODO (below) |
+| Steam release | ⬜ TODO (below) |
 
-Test edilen sürümler: **Godot 4.6 stable**, **XR Tools 4.5.1**,
+Tested versions: **Godot 4.6 stable**, **XR Tools 4.5.1**,
 **OpenXR Vendors 4.3.0-stable**, **JDK 17**, **Android SDK 34 / min 32**.
 
 ---
 
-## 1. Gereksinimler
+## 1. Requirements
 
-- **Godot 4.6 stable** (editör). `Editor → Manage Export Templates` ile 4.6 export
-  şablonlarının kurulu olması gerekir.
-- **OpenXR Vendors 4.3.0-stable** — repoda YOKTUR (bilerek `.gitignore`'da).
-  CI ve aşağıdaki kurulum adımı indirir. Sürüm: `.github/workflows/publish-demo-on-push.yaml`
-  içindeki `OPENXR_VENDORS_VERSION` ile aynı olmalı.
-- Android export için: **JDK 17** + **Android SDK** (platform 34, build-tools 34,
-  NDK, cmake) + `ANDROID_HOME` tanımlı olmalı.
-- Quest 3 cihaz testi için: `adb` (SDK platform-tools) + Quest'te geliştirici modu.
+- **Godot 4.6 stable** (editor). Install the 4.6 export templates via
+  `Editor → Manage Export Templates`.
+- **OpenXR Vendors 4.3.0-stable** — NOT in the repo (intentionally `.gitignore`d).
+  CI and the setup step below download it. The version must match
+  `OPENXR_VENDORS_VERSION` in `.github/workflows/publish-demo-on-push.yaml`.
+- For Android export: **JDK 17** + **Android SDK** (platform 34, build-tools 34,
+  NDK, cmake) + `ANDROID_HOME` set.
+- For on-device Quest 3 testing: `adb` (SDK platform-tools) + developer mode on Quest.
 
-## 2. Kurulum
+## 2. Setup
 
 ```powershell
 git clone https://github.com/eedali/Godot-VR-Template.git
 ```
 
-1. Vendors eklentisini kur (repo kökünde çalıştır):
+1. Install the vendors plugin (run from the repo root):
    ```powershell
-   # 4.3.0-stable zip'ini indir:
+   # Download the 4.3.0-stable zip:
    # https://github.com/GodotVR/godot_openxr_vendors/releases/download/4.3.0-stable/godotopenxrvendorsaddon.zip
-   # içindeki asset/addons/godotopenxrvendors klasörünü addons/ altına kopyala
+   # Copy the asset/addons/godotopenxrvendors folder into addons/
    ```
-2. Projeyi Godot 4.6 ile aç → otomatik import başlar.
-3. Android build template'i kur (bir kez):
+2. Open the project with Godot 4.6 → automatic import starts.
+3. Install the Android build template (once):
    `Project → Install Android Build Template...`
-   (veya headless: `godot --headless --path . --install-android-build-template --quit`)
-4. `Project → Export` penceresinde **Android Quest** ve **Windows** presetlerini gör.
+   (or headless: `godot --headless --path . --install-android-build-template --quit`)
+4. Check the **Android Quest** and **Windows** presets in `Project → Export`.
 
-## 3. Hızlı test
+## 3. Quick test
 
-### PC'de (headsetsiz)
+### On PC (no headset)
 
-Template'de `godot-xr-tools` **desktop-support** vardır; HMD yoksa oyun normal
-modda açılır (WASD + fare). OpenXR hatası
-(`Failed to create XR instance`) bu durumda **normaldir**.
+The template includes `godot-xr-tools` **desktop-support**; without an HMD the game
+starts in normal mode (WASD + mouse). The OpenXR error
+(`Failed to create XR instance`) is **expected** in that case.
 
 ```powershell
-# Windows debug derleme
+# Windows debug build
 godot --headless --path . --export-debug "Windows"
-# çıktı: build/windows/Game.exe
+# output: build/windows/Game.exe
 ```
 
-### Quest 3'te
+### On Quest 3
 
 ```powershell
 adb devices
 adb install -r build/android-quest/Game.apk
 ```
 
-Başlıkta **VRStudio XR Game**'i aç: splash → start menüsü → 3 zone
-(`house_interior`, `house_back_yard`, `outside`). Teleport, crate/rock grab,
-el takibi ve passthrough'u dene.
+Open **VRStudio XR Game** on the headset: splash → start menu → 3 zones
+(`house_interior`, `house_back_yard`, `outside`). Try teleport, crate/rock grab,
+hand tracking and passthrough.
 
-Log: `adb logcat | Select-String "godot|openxr|vrstudio"`
+Logs: `adb logcat | Select-String "godot|openxr|vrstudio"`
 
-## 4. Proje ayarları (neden böyle?)
+## 4. Project settings (why this way?)
 
-- `project.godot` → `rendering_method = gl_compatibility` (hem desktop hem mobile).
-  **Quest'te zorunlu.** Steam için görsellik istersen sonra desktop tarafını
-  `Forward+` yapabilirsin, ama Quest (`*.mobile`) `gl_compatibility` kalmalı.
-- `xr/openxr`: `enabled=true`, foveation level 3 + dynamic (Quest performansı),
-  Meta color space başlangıcı.
+- `project.godot` → `rendering_method = gl_compatibility` (both desktop and mobile).
+  **Required on Quest.** If you want better visuals for Steam later, you can switch
+  the desktop side to `Forward+`, but Quest (`*.mobile`) must stay `gl_compatibility`.
+- `xr/openxr`: `enabled=true`, foveation level 3 + dynamic (Quest performance),
+  Meta starting color space.
 - `export_presets.cfg` → **Android Quest**: `com.vrstudio.xrgame`, v1.0.0,
-  `minSdk 32 / targetSdk 34`, `arm64-v8a` tek mimari, Meta plugini açık,
-  Quest 2/3/Pro desteği açık, Quest 1 kapalı, hand tracking + passthrough açık,
-  eye tracking kapalı (Quest 3'te göz takibi yok).
-- **Windows**: `VRStudio / VRStudio XR Game 1.0.0`, SteamVR OpenXR runtime ile
-  çalışır, ek plugin gerekmez.
-- Not: upstream'deki `build/android-hronos` yazım hatası `build/android-khronos`
-  olarak düzeltildi (CI artifact klasörüyle tutarlılık için).
+  `minSdk 32 / targetSdk 34`, single `arm64-v8a` architecture, Meta plugin enabled,
+  Quest 2/3/Pro support on, Quest 1 off, hand tracking + passthrough on,
+  eye tracking off (Quest 3 has no eye tracking).
+- **Windows**: `VRStudio / VRStudio XR Game 1.0.0`, works with the SteamVR OpenXR
+  runtime, no extra plugin needed.
+- Note: the upstream `build/android-hronos` typo was fixed to `build/android-khronos`
+  (for consistency with the CI artifact folder).
 
-## 5. Klasör yapısı
+## 5. Folder structure
 
 ```
 game/            # main.tscn, game_state (singleton), start_scene, zones, items
-components/      # persistent staging/world/zone sistemi
-addons/godot-xr-tools/   # XR Tools 4.5.1 (repoda)
-addons/godotopenxrvendors/ # CI/kurulumda iner, repoda YOK
+components/      # persistent staging/world/zone system
+addons/godot-xr-tools/   # XR Tools 4.5.1 (in repo)
+addons/godotopenxrvendors/ # downloaded by CI/setup, NOT in repo
 export_presets.cfg  # Windows, Linux, Android Quest/Pico/Lynx/Khronos, WebXR
 openxr_action_map.tres
-build/           # export çıktıları (git'e girmez, .gitignore)
-android/         # build template (git'e girmez, .gitignore)
+build/           # export outputs (not in git, .gitignore)
+android/         # build template (not in git, .gitignore)
 ```
 
-## 6. TODO — yapılması gerekenler
+## 6. TODO — remaining work
 
-### Oyun kimliği (şart)
-- [ ] `icon.png` → kendi oyun ikonunla değiştir (şu an Godot ikonu)
-- [ ] `assets/splash/splash.png` → kendi splash'in
-- [ ] `project.godot` → `config/name` gerçek oyun adı
-- [ ] `export_presets.cfg` → `package/unique_name` gerçek yayıncı paketin
-  (şu an placeholder `com.vrstudio.xrgame`) ve `package/name`
-- [ ] Demo zone'ları kendi sahnelerinle değiştir (`game/zones/`), başlangıç
-  zone'u `game_state.tscn` üzerinde seç
+### Game identity (required)
+- [ ] `icon.png` → replace with your own game icon (currently the Godot icon)
+- [ ] `assets/splash/splash.png` → your own splash
+- [ ] `project.godot` → `config/name` with the real game name
+- [ ] `export_presets.cfg` → `package/unique_name` with your real publisher package
+  (currently placeholder `com.vrstudio.xrgame`) and `package/name`
+- [ ] Replace demo zones with your own scenes (`game/zones/`), pick the starting
+  zone on `game_state.tscn`
 
-### Meta Store yayını
-- [ ] Release keystore üret (debug keystore ile store'a çıkılmaz) ve güvenli sakla
-- [ ] Release derleme: `gradle_build/export_format` → AAB, `--export-release`
-- [ ] Meta Quest Developer hesabı + uygulama kaydı, VRC testlerinden geç
-- [ ] İkon, kapak, yaş/privacy beyanları, `targetSdk` güncelliğini koru
+### Meta Store release
+- [ ] Generate a release keystore (a store release cannot use the debug keystore)
+  and keep it safe
+- [ ] Release build: `gradle_build/export_format` → AAB, `--export-release`
+- [ ] Meta Quest Developer account + app registration, pass the VRC tests
+- [ ] Icon, cover art, age/privacy declarations, keep `targetSdk` up to date
 
-### Steam yayını
-- [ ] Steamworks hesabı + app kaydı; Godot Steam plugin'i gerekiyorsa ekle
-  (şu an template'de yok — sadece OpenXR PCVR hazır)
-- [ ] Windows **release** export al, SteamVR kurulu PC'de test et
-- [ ] İstersen PC tarafı için `Forward+` + yüksek kalite materyal/ışık geçişi yap
-  (ayrı branch önerilir, Quest `gl_compatibility` kalır)
+### Steam release
+- [ ] Steamworks account + app registration; add a Godot Steam plugin if needed
+  (not in the template — only OpenXR PCVR is ready)
+- [ ] Take a Windows **release** export, test on a PC with SteamVR installed
+- [ ] Optionally switch the PC side to `Forward+` + high-quality materials/lights
+  (separate branch recommended, Quest stays `gl_compatibility`)
 
-### Kalite / performans
-- [ ] Quest 3'te 72/90/120 Hz + el takibi + passthrough açıkken kare hızı ölç
-- [ ] Doku sıkıştırma: mobil için ETC2/ASTC (`textures/vram_compression` açık),
-  gereksiz 4K dokuları küçült
-- [ ] Işık/gölge sayısını mobil bütçeye indir, `gl_compatibility` limitlerine dikkat
+### Quality / performance
+- [ ] Measure frame rate on Quest 3 at 72/90/120 Hz with hand tracking + passthrough on
+- [ ] Texture compression: ETC2/ASTC for mobile (`textures/vram_compression` is on),
+  downscale unnecessary 4K textures
+- [ ] Reduce light/shadow count to the mobile budget, mind `gl_compatibility` limits
 
-## 7. Bilinen durumlar
+## 7. Known notes
 
-- Headless Android export sonrası Godot işlemi bazen hemen kapanmaz (gradle
-  daemon) — APK oluşmuşsa (`build/android-quest/Game.apk` ~97 MB) sorun yok,
-  işlemi kapatabilirsin.
-- PC'de HMD'siz çalıştırmada OpenXR uyarısı normaldir (desktop fallback).
-- `main` kolu upstream'i takip eder; çektiğin commit: `654622d`
-  (Godot 4.6.1 / XR Tools 4.5.1 yükseltmesi). Upstream `upstream` remote'unda
-  durur, kendi çalışman `origin` (`eedali/Godot-VR-Template`) üzerindendir.
+- After a headless Android export the Godot process sometimes does not exit
+  immediately (gradle daemon) — if the APK exists
+  (`build/android-quest/Game.apk` ~97 MB) all is fine, you can kill the process.
+- The OpenXR warning when running on a PC without an HMD is normal (desktop fallback).
+- `main` follows upstream; the pulled commit is `654622d`
+  (Godot 4.6.1 / XR Tools 4.5.1 upgrade). Upstream lives in the `upstream` remote,
+  your own work goes to `origin` (`eedali/Godot-VR-Template`).
 
-## 8. Kredi / lisans
+## 8. Credits / license
 
-- Şablon: [Godot XR Template](https://github.com/GodotVR/godot-xr-template) — MIT
-  (`LICENSE` dosyasına bak). XR Tools ve OpenXR Vendors kendi lisanslarına sahiptir.
-- Bu repo: upstream MIT lisansını korur. Kendi oyununun kod/sanat içeriği için
-  lisansını netleştirmeden store'a çıkma.
+- Template: [Godot XR Template](https://github.com/GodotVR/godot-xr-template) — MIT
+  (see `LICENSE`). XR Tools and OpenXR Vendors have their own licenses.
+- This repo keeps the upstream MIT license. Clarify the license of your own
+  game code/art content before releasing to stores.
