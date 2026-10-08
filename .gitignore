@@ -8,12 +8,6 @@ build/linux/*
 !build/linux/.gitignore
 build/android-quest/*
 !build/android-quest/.gitignore
-build/android-pico/*
-!build/android-pico/.gitignore
-build/android-lynx/*
-!build/android-lynx/.gitignore
-build/android-khronos/*
-!build/android-khronos/.gitignore
 build/webxr/*
 !build/webxr/.gitignore
 # Logs & temp

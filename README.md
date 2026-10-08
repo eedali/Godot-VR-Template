@@ -95,11 +95,23 @@ game/            # main.tscn, game_state (singleton), start_scene, zones, items
 components/      # persistent staging/world/zone system
 addons/godot-xr-tools/   # XR Tools 4.5.1 (in repo)
 addons/godotopenxrvendors/ # downloaded by CI/setup, NOT in repo
-export_presets.cfg  # Windows, Linux, Android Quest/Pico/Lynx/Khronos, WebXR
+export_presets.cfg  # Windows, Linux, Android Quest, WebXR
 openxr_action_map.tres
 build/           # export outputs (not in git, .gitignore)
 android/         # build template (not in git, .gitignore)
 ```
+
+## CI (GitHub Actions)
+
+`Publish Demo` builds **Windows, Linux, Android Quest, WebXR** on every push
+(Pico/Lynx/Khronos targets were dropped — Quest-only focus). Notes:
+
+- Ubuntu runners already ship the Android SDK; the workflow installs the
+  required packages directly (the old `setup-android` action step was removed —
+  it called the long-gone `sdkmanager tools` package and failed all Android jobs).
+- `fail-fast` is off, so one platform failing won't cancel the others.
+- Release/tag-only steps (butler, zip, GitHub Release) need `BUTLER_API_KEY`
+  only for itch.io; plain pushes just upload build artifacts.
 
 ## 6. TODO — remaining work
 
