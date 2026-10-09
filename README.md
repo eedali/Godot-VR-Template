@@ -11,7 +11,7 @@
 | Meta Store release (AAB, release signature) | ⬜ TODO (below) |
 | Steam release | ⬜ TODO (below) |
 
-Tested versions: **Godot 4.6 stable**, **XR Tools 4.5.1**,
+Tested versions: **Godot 4.6 stable**, **XR Tools 4.5.2**,
 **OpenXR Vendors 4.3.0-stable**, **JDK 17**, **Android SDK 34 / min 32**.
 
 ---
