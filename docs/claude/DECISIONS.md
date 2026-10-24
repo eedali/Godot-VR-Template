@@ -252,3 +252,33 @@ The showcase spawns players at `FromAnywhere`; its portal returns to Outside
 at that zone's default spawn. The wrist menu "Showcase" button is meant for
 testing and documented as removable.
 Reversible: yes.
+
+### D-23 — CI Godot version stays 4.6.1   (phase 6, 2026-10-24)
+Context: AUDIT D2 asked to verify `GODOT_VERSION: 4.6.1` exists, else use
+4.6-stable, and to make README and CI agree. The local editor is 4.6-stable.
+Decision: `4.6.1-stable` exists on godotengine/godot-builds (published
+2026-02-16; 4.6.3 is the newest 4.6 patch), so CI keeps 4.6.1 (a bug-fix
+release of the same feature level the project targets, `config/features=4.6`).
+README states: local 4.6-stable or any 4.6.x works, CI builds with 4.6.1.
+Alternatives: pin CI to 4.6.0 to equal the local editor (loses bug fixes);
+bump to 4.6.3 (untested here).
+Reversible: yes — one line in the workflow.
+
+### D-24 — CI exports fail loudly; Android CI gets a throw-away debug keystore   (phase 6, 2026-10-24)
+Context: the export step ended in `|| exit 0`, so a broken export never failed
+CI (AUDIT D1). Making it strict would turn the Android job red because CI has
+no debug keystore configured.
+Decision: the export step removes the expected output first, fails on Godot's
+non-zero exit (the runner shell uses `-e -o pipefail`), on an
+"ERROR: Project export/Cannot export/Failed to export" line, or on a missing
+output file (`export-file` per matrix entry). The Android job generates a
+debug keystore with `keytool` and passes it through Godot's documented
+`GODOT_ANDROID_KEYSTORE_DEBUG_*` variables. The import step stays tolerant.
+Reversible: yes.
+
+### D-25 — Quest render settings   (phase 6, 2026-10-24)
+Decision: `msaa_3d=2` (4x) desktop, `msaa_3d.mobile=1` (2x) Quest as PLAN 6.1
+says; `directional_shadow/size.mobile=2048` (written explicitly, equals the
+engine default) and `positional_shadow/atlas_size.mobile=1024` (engine default
+2048) to save Quest memory. Knobs documented in docs/HOWTO_NEW_GAME.md §6.
+Reversible: yes.

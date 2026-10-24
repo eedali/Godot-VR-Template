@@ -1,4 +1,4 @@
-# This workflow file build the Godot XR Tools Demo project for multiple target systems.
+# This workflow builds the Godot VR Template for multiple target systems.
 ---
 
 
@@ -13,17 +13,23 @@ on:
 
 # Environment variables
 env:
-  # Configure Godot version
+  # Configure Godot version (setup-godot needs major.minor.patch).
+  # 4.6.1-stable exists on https://github.com/godotengine/godot-builds/releases
+  # (checked 2026-10-24; 4.6.3 is the newest 4.6 patch). The project targets
+  # the 4.6 feature level, so any 4.6.x editor can open it - see README.
   GODOT_VERSION: 4.6.1
 
-  # OpenXR Vendors version
+  # OpenXR Vendors version (keep in sync with tools/setup_vendors.sh)
   OPENXR_VENDORS_VERSION: 4.3.0-stable
-  
-  # Butler API Key (comment to disable)
+
+  # Butler API Key (comment to disable). Without the BUTLER_API_KEY secret no
+  # upload is attempted.
   BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-  
-  # Butler User/Game (set to itch.io user/game)
-  BUTLER_USER_GAME: godot-xr/godot-xr-template
+
+  # Butler User/Game: the itch.io "user/game" page tagged releases are pushed
+  # to. PLACEHOLDER - change it to your own itch.io page before adding the
+  # BUTLER_API_KEY secret (it used to point at upstream's godot-xr/godot-xr-template).
+  BUTLER_USER_GAME: eedali/godot-vr-template
 
 
 # CI jobs
@@ -45,6 +51,7 @@ jobs:
             export-preset: Windows
             export-type: release
             export-folder: build/windows
+            export-file: build/windows/Game.exe
             archive: Windows
             butler-channel: windows
 
@@ -55,6 +62,7 @@ jobs:
             export-preset: Linux
             export-type: release
             export-folder: build/linux
+            export-file: build/linux/Game.x86_64
             archive: Linux
             butler-channel: linux
 
@@ -66,6 +74,7 @@ jobs:
             export-type: debug
             export-args: --install-android-build-template
             export-folder: build/android-quest
+            export-file: build/android-quest/Game.apk
             archive: Android-Quest
             butler-channel: android-quest
 
@@ -76,6 +85,7 @@ jobs:
             export-preset: WebXR
             export-type: release
             export-folder: build/webxr
+            export-file: build/webxr/index.html
             archive: WebXR
             butler-channel: webxr
 
@@ -123,6 +133,20 @@ jobs:
             "cmake;3.10.2.4988404" \
             "ndk;23.2.8568313"
 
+      # Android debug exports need a debug keystore; CI has none, so create a
+      # throw-away one and hand it to Godot through its documented env vars.
+      - name: Create Android debug keystore
+        if: matrix.platform == 'android'
+        shell: bash
+        run: |
+          keytool -genkeypair -v -keystore "$RUNNER_TEMP/debug.keystore" \
+            -storepass android -alias androiddebugkey -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$RUNNER_TEMP/debug.keystore" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
+
       # Setup Godot
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
@@ -137,11 +161,23 @@ jobs:
         run: |
           godot --headless --verbose --import || exit 0
 
-      # Export project
+      # Export project. The import above may report errors on a fresh
+      # checkout (no .godot cache yet), so it stays tolerant; the export must
+      # succeed and produce the expected file.
       - name: Export Godot Project
         shell: bash
         run: |
-          godot --headless ${{ matrix.export-args }} --export-${{ matrix.export-type }} "${{ matrix.export-preset }}" || exit 0
+          set -o pipefail
+          rm -f "${{ matrix.export-file }}"
+          godot --headless ${{ matrix.export-args }} --export-${{ matrix.export-type }} "${{ matrix.export-preset }}" 2>&1 | tee export.log
+          if grep -E "ERROR: (Project export|Cannot export|Failed to export)" export.log; then
+            echo "::error::Godot reported an export error"
+            exit 1
+          fi
+          if [ ! -f "${{ matrix.export-file }}" ]; then
+            echo "::error::Expected export output ${{ matrix.export-file }} is missing"
+            exit 1
+          fi
 
       # Upload artifacts
       - name: Upload Artifacts
@@ -155,7 +191,7 @@ jobs:
       # Install butler (if building release with butler support)
       - name: Install Butler
         if: >
-          github.event_name == 'push' && 
+          github.event_name == 'push' &&
           github.ref_type == 'tag' &&
           env.BUTLER_API_KEY != ''
         uses: remarkablegames/setup-butler@v1
@@ -165,7 +201,7 @@ jobs:
       # Push to itch.io (if building release)
       - name: Push to itch.io
         if: >
-          github.event_name == 'push' && 
+          github.event_name == 'push' &&
           github.ref_type == 'tag' &&
           env.BUTLER_API_KEY != ''
         run: >
@@ -178,7 +214,7 @@ jobs:
       # Compress project (if building release)
       - name: Compress Project
         if: >
-          github.event_name == 'push' && 
+          github.event_name == 'push' &&
           github.ref_type == 'tag'
         run: |
           cd ${{ matrix.export-folder }}
@@ -188,7 +224,7 @@ jobs:
       - name: Publish Release
         uses: ncipollo/release-action@v1
         if: >
-          github.event_name == 'push' && 
+          github.event_name == 'push' &&
           github.ref_type == 'tag'
         with:
           allowUpdates: true

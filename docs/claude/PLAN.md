@@ -184,19 +184,19 @@ Options pane shows the settings UI.
 
 ## Phase 6 — Platform, export & CI (`chore:` / `ci:`)
 
-- [ ] 6.1 `project.godot`: MSAA is currently off everywhere (probed). Set
+- [x] 6.1 `project.godot`: MSAA is currently off everywhere (probed). Set
       `rendering/anti_aliasing/quality/msaa_3d=2` (4x) for desktop and the
       `.mobile` override `rendering/anti_aliasing/quality/msaa_3d.mobile=1` (2x)
       for Quest; add shadow atlas size overrides for mobile; document the knobs
       in `docs/HOWTO_NEW_GAME.md`.
-- [ ] 6.2 `export_presets.cfg`: stale filters gone (Phase 1), presets still
+- [x] 6.2 `export_presets.cfg`: stale filters gone (Phase 1), presets still
       export; `gradle_build/min_sdk`/`target_sdk` unchanged.
-- [ ] 6.3 CI (`publish-demo-on-push.yaml`): export step fails on error and on
+- [x] 6.3 CI (`publish-demo-on-push.yaml`): export step fails on error and on
       missing output; `BUTLER_USER_GAME` → `eedali/godot-vr-template` with a
       comment; verify `GODOT_VERSION` exists on
       `https://github.com/godotengine/godot-builds/releases` (web fetch); align
       README. `gdlint-on-push.yml`: lint `components game tools`, `setup-python@v5`.
-- [ ] 6.4 `bash tools/check.sh --export` → `build/windows/Game.exe` produced.
+- [x] 6.4 `bash tools/check.sh --export` → `build/windows/Game.exe` produced.
       If export templates are missing, note it in `PROGRESS.md` (the user can
       install them from the editor) and do not fail the phase on that alone.
 - [ ] 6.5 Commit, push.
