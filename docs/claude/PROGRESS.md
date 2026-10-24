@@ -94,4 +94,6 @@ a prompt; GitHub Actions ran both workflows on every push of the branch.
 - 2026-10-24 19:23 — claude/template-overhaul — ok (350103b)
 - 2026-10-24 19:29 — claude/template-overhaul — ok (09ba5f7; first run with strict CI exports: Windows, Linux, Android Quest, WebXR all green, run 40111896037)
 - 2026-10-24 19:31 — claude/template-overhaul — ok (fec31f6; CI green, run 40112085963)
-- 2026-10-24 19:43 — claude/template-overhaul — ok (7903c1e)
+- 2026-10-24 19:43 — claude/template-overhaul — ok (7903c1e) — CI green on all 4 platforms (run 40112979970)
+- 2026-10-24 20:10 — claude/template-overhaul — ok (eed23d9, final review fixes)
+- PR: https://github.com/eedali/Godot-VR-Template/pull/1 (base `main`, opened with `gh pr create`)

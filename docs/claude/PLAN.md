@@ -233,11 +233,11 @@ only the docs.
       (delete `.godot/imported` is **not** allowed; just run the import again).
 - [x] 8.2 `godot-reviewer` on `git diff main...HEAD`; fix `high` findings.
 - [x] 8.3 `PROGRESS.md` final table; `DECISIONS.md` complete.
-- [ ] 8.4 `git push -u origin claude/template-overhaul`. If a PR can be opened
+- [x] 8.4 `git push -u origin claude/template-overhaul`. If a PR can be opened
       with `gh pr create --fill --base main` (gh logged in), do it and record the
       URL; otherwise record the compare URL
       `https://github.com/eedali/Godot-VR-Template/compare/main...claude/template-overhaul`.
-- [ ] 8.5 Print the final **Turkish** report (CLAUDE.md rule 2): what changed,
+- [x] 8.5 Print the final **Turkish** report (CLAUDE.md rule 2): what changed,
       what was verified, what needs a headset test (list every feature marked
       "needs headset test"), branch/PR link, push status.
 
