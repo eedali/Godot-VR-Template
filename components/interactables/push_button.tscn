@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_area_button.gd" id="1_r"]
+[ext_resource type="Material" path="res://assets/prototype_materials/dark_brown.tres" id="2_r"]
+
+[sub_resource type="BoxMesh" id="Mesh_base"]
+size = Vector3(0.12, 0.04, 0.12)
+
+[sub_resource type="BoxShape3D" id="Shape_base"]
+size = Vector3(0.12, 0.04, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="Mat_cap"]
+albedo_color = Color(0.8, 0.15, 0.1, 1)
+
+[sub_resource type="CylinderMesh" id="Mesh_cap"]
+material = SubResource("Mat_cap")
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.02
+
+[sub_resource type="BoxShape3D" id="Shape_area"]
+size = Vector3(0.07, 0.03, 0.07)
+
+[node name="PushButton" type="Node3D"]
+
+[node name="Base" type="StaticBody3D" parent="."]
+
+[node name="Mesh" type="MeshInstance3D" parent="Base"]
+mesh = SubResource("Mesh_base")
+surface_material_override/0 = ExtResource("2_r")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Base"]
+shape = SubResource("Shape_base")
+
+[node name="Cap" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("Mesh_cap")
+
+[node name="InteractableAreaButton" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.045, 0)
+collision_layer = 0
+collision_mask = 131072
+script = ExtResource("1_r")
+button = NodePath("../Cap")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableAreaButton"]
+shape = SubResource("Shape_area")
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Button"
+font_size = 48
+outline_size = 8

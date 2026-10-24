@@ -1,9 +1,5 @@
-[gd_scene load_steps=3 format=3 uid="uid://cvn48xcmsmkrb"]
+[gd_scene load_steps=2 format=3 uid="uid://cvn48xcmsmkrb"]
 
-[ext_resource type="Script" uid="uid://dqgmlfnkvyy3m" path="res://components/persistent/persistent_zone.gd" id="1_zone"]
-[ext_resource type="PackedScene" path="res://components/player/player_rig.tscn" id="2_rig"]
+[ext_resource type="PackedScene" uid="uid://di1bu0tceg332" path="res://components/persistent/persistent_zone.tscn" id="1_zone"]
 
-[node name="ZoneBase" type="Node3D"]
-script = ExtResource("1_zone")
-
-[node name="XROrigin3D" parent="." instance=ExtResource("2_rig")]
+[node name="ZoneBase" instance=ExtResource("1_zone")]

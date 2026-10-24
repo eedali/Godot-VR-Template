@@ -115,7 +115,7 @@ body = `PlayerBody`, zone = must also be placed in the zone scene).
 | `hand_tracking` | on | Show hands for controller-free hand tracking (project setting `xr/openxr/extensions/hand_tracking` must also be on) | L + R |
 | `passthrough` | off | Mixed-reality passthrough (Quest) | origin |
 | `desktop_fallback` | on | Keyboard / mouse controls when no headset is found | origin |
-| `debug_hud` | off | FPS / frame time / battery panel (debug builds only) | camera |
+| `debug_hud` | off | FPS / frame time / draw calls / memory panel (debug builds only; Godot 4 has no battery API) | camera |
 | `target_refresh_rate` | 0 | Display refresh rate in Hz; 0 = runtime default (Quest 3: 72/90/120) | staging |
 | `physics_rate_multiplier` | 1 | Physics ticks per display frame | staging |
 

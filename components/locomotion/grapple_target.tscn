@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Material" path="res://assets/prototype_materials/wood_brown.tres" id="1_r"]
+
+[sub_resource type="BoxShape3D" id="Shape_target"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[sub_resource type="BoxMesh" id="Mesh_target"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[node name="GrappleTarget" type="StaticBody3D"]
+collision_layer = 17
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape_target")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_target")
+surface_material_override/0 = ExtResource("1_r")
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Grapple target"
+font_size = 48
+outline_size = 8

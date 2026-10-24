@@ -209,9 +209,19 @@ func _check_player_rig() -> void:
 	for path : String in paths:
 		if not rig.has_node(path):
 			_failures.append(PLAYER_RIG_SCENE + " (feature node missing: %s)" % path)
-	for table : Dictionary in [rig.FEATURE_NODES, rig.SETTING_NODES]:
+	for table : Dictionary in [rig.FEATURE_NODES, rig.SETTING_NODES, rig.EXTERNAL_FEATURES]:
 		for feature : StringName in table:
 			if not config.has_feature(feature):
 				_failures.append(PLAYER_RIG_SCENE + " (unknown feature in rig: %s)" % feature)
+
+	# Every toggle must have a node, a handler or a documented external owner
+	for feature : StringName in config.get_feature_names():
+		var handled : bool = rig.FEATURE_NODES.has(feature) or rig.SETTING_NODES.has(feature) \
+				or rig.EXTERNAL_FEATURES.has(feature)
+		if not handled:
+			_failures.append(PLAYER_RIG_SCENE + " (feature not handled anywhere: %s)" % feature)
+	for feature : StringName in rig.BODY_FEATURES:
+		if not rig.DEPENDENTS[&"player_body"].has(feature):
+			_failures.append(PLAYER_RIG_SCENE + " (DEPENDENTS[player_body] misses %s)" % feature)
 	print("smoke_test: PlayerRig has %d feature node paths" % paths.size())
 	rig.free()

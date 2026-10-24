@@ -14,6 +14,10 @@ extends Resource
 ## Groups follow docs/claude/FEATURES.md. See docs/HOWTO_TOGGLE.md.
 
 
+# Setting names, collected once from the script's exported properties
+static var _feature_names : Array[StringName] = []
+
+
 @export_group("Locomotion")
 
 ## Smooth (direct) movement with the thumbsticks
@@ -146,7 +150,7 @@ extends Resource
 ## Keyboard/mouse controls when no headset is available
 @export var desktop_fallback : bool = true
 
-## Debug HUD with FPS, frame time and battery (debug builds only)
+## Debug HUD with FPS, frame time, draw calls and memory (debug builds only)
 @export var debug_hud : bool = false
 
 ## Target display refresh rate in Hz (0 = runtime default; Quest 3: 72/90/120)
@@ -167,22 +171,22 @@ extends Resource
 ## Returns true if the feature [param feature] is switched on. Non-boolean
 ## settings are converted (0 = off). Unknown names return false.
 func is_enabled(feature : StringName) -> bool:
-	var value : Variant = get(feature)
-	if value == null:
+	if not has_feature(feature):
 		return false
-	return bool(value)
+	return bool(get(feature))
 
 
-## Returns true if [param feature] is a setting of this configuration
+## Returns true if [param feature] is a setting of this configuration (built-in
+## Resource properties such as [code]resource_name[/code] are not settings)
 func has_feature(feature : StringName) -> bool:
-	return get(feature) != null
+	return get_feature_names().has(feature)
 
 
 ## Returns the names of every setting in this configuration, in inspector order
 func get_feature_names() -> Array[StringName]:
-	var names : Array[StringName] = []
-	for prop in get_property_list():
-		var usage : int = prop["usage"]
-		if usage & PROPERTY_USAGE_SCRIPT_VARIABLE and usage & PROPERTY_USAGE_STORAGE:
-			names.append(StringName(prop["name"]))
-	return names
+	if _feature_names.is_empty():
+		for prop in get_property_list():
+			var usage : int = prop["usage"]
+			if usage & PROPERTY_USAGE_SCRIPT_VARIABLE and usage & PROPERTY_USAGE_STORAGE:
+				_feature_names.append(StringName(prop["name"]))
+	return _feature_names

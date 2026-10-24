@@ -66,7 +66,7 @@ fi
 # ----------------------------------------------------------------- 4. gdlint
 step "3/4 gdlint (optional)"
 if command -v gdlint > /dev/null 2>&1; then
-	if gdlint components game tools > "$LOGS/gdlint.log" 2>&1; then
+	if gdlint components config game tools > "$LOGS/gdlint.log" 2>&1; then
 		pass "gdlint"
 	else
 		tail -40 "$LOGS/gdlint.log"
@@ -87,15 +87,25 @@ if [ "$DO_RUN" -eq 1 ]; then
 		pass "headless run (desktop fallback, OpenXR init failure is expected)"
 	fi
 
-	# Real game flow: start scene -> new game -> every zone in the database
-	if timeout 300 $GODOT $RUN_FLAGS --path . --script res://tools/zone_load_test.gd > "$LOGS/zones.log" 2>&1 \
-			&& ! grep -E -q "SCRIPT ERROR|Parse Error" "$LOGS/zones.log"; then
-		grep -E "zone_load_test:" "$LOGS/zones.log" || true
-		pass "zone load test (start menu -> new game -> all zones)"
-	else
-		grep -E "FAIL:|zone_load_test:|SCRIPT ERROR" -A3 "$LOGS/zones.log" | head -60
-		fail "zone load test (see $LOGS/zones.log)"
-	fi
+	# Real game flow: start scene -> new game -> every zone in the database,
+	# with the default features, with every feature on, and with a minimal
+	# rig that frees disabled nodes (catches dangling references).
+	zone_test() { # <log name> <description> [--set=...]
+		local log="$LOGS/$1.log" what="$2"
+		shift 2
+		if timeout 300 $GODOT $RUN_FLAGS --path . --script res://tools/zone_load_test.gd -- "$@" > "$log" 2>&1 \
+				&& ! grep -E -q "SCRIPT ERROR|Parse Error|previously freed" "$log"; then
+			grep -E "zone_load_test: (zone loaded|runtime|[0-9]+ failure)" "$log" | tail -2 || true
+			pass "zone load test: $what"
+		else
+			grep -E "FAIL:|zone_load_test:|SCRIPT ERROR|previously freed" -A3 "$log" | head -60
+			fail "zone load test: $what (see $log)"
+		fi
+	}
+	zone_test zones "default features"
+	zone_test zones-all-on "every feature on" --set=all_on
+	zone_test zones-minimal "minimal rig, remove_disabled_nodes" \
+		--set=remove_disabled_nodes=true,player_body=false,pickup=false,pockets=false,collision_hands=false,hand_models=false,teleport=false,pointer=false,vignette=false
 fi
 
 if [ "$DO_EXPORT" -eq 1 ]; then

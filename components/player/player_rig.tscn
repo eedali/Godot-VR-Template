@@ -17,6 +17,22 @@
 [ext_resource type="PackedScene" uid="uid://qmejywplaagw" path="res://components/persistent/persistent_pocket.tscn" id="16_4oqtv"]
 [ext_resource type="PackedScene" uid="uid://da2qgxxwwitl6" path="res://addons/godot-xr-tools/objects/highlight/highlight_ring.tscn" id="17_1njvn"]
 [ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="18_l4ed5"]
+[ext_resource type="PackedScene" uid="uid://fiul51tsyoop" path="res://addons/godot-xr-tools/functions/function_teleport.tscn" id="20_tele"]
+[ext_resource type="PackedScene" uid="uid://do1wif8rpqtwj" path="res://addons/godot-xr-tools/functions/function_gaze_pointer.tscn" id="21_gaze"]
+[ext_resource type="PackedScene" uid="uid://cc6ngdqie8o8c" path="res://addons/godot-xr-tools/effects/vignette.tscn" id="22_vign"]
+[ext_resource type="PackedScene" uid="uid://bft3xyxs31ci3" path="res://addons/godot-xr-tools/functions/function_pose_detector.tscn" id="23_pose"]
+[ext_resource type="PackedScene" uid="uid://c78tjrtiyqna8" path="res://addons/godot-xr-tools/functions/movement_grapple.tscn" id="24_grap"]
+[ext_resource type="PackedScene" uid="uid://ckt118vcpmr6q" path="res://addons/godot-xr-tools/functions/movement_physical_jump.tscn" id="25_pjmp"]
+[ext_resource type="PackedScene" uid="uid://chcuj3jysipk8" path="res://addons/godot-xr-tools/functions/movement_jog.tscn" id="26_jog"]
+[ext_resource type="PackedScene" uid="uid://bxm1ply47vaan" path="res://addons/godot-xr-tools/functions/movement_climb.tscn" id="27_clmb"]
+[ext_resource type="PackedScene" uid="uid://kyhaogt0a4q8" path="res://addons/godot-xr-tools/functions/movement_flight.tscn" id="28_flgt"]
+[ext_resource type="PackedScene" uid="uid://cvokcudrffkgc" path="res://addons/godot-xr-tools/functions/movement_glide.tscn" id="29_glid"]
+[ext_resource type="PackedScene" uid="uid://bk6ban0hctyym" path="res://addons/godot-xr-tools/functions/movement_wall_walk.tscn" id="30_wall"]
+[ext_resource type="PackedScene" uid="uid://dg3gr6ofd8yx4" path="res://addons/godot-xr-tools/functions/movement_world_grab.tscn" id="31_wgrb"]
+[ext_resource type="PackedScene" uid="uid://bgts3vpmjn6bb" path="res://addons/godot-xr-tools/functions/movement_wind.tscn" id="32_wind"]
+[ext_resource type="PackedScene" uid="uid://0xlsitpu17r1" path="res://addons/godot-xr-tools/functions/movement_footstep.tscn" id="33_foot"]
+[ext_resource type="PackedScene" path="res://components/system/debug_hud.tscn" id="34_dhud"]
+[ext_resource type="Script" path="res://components/system/passthrough_controller.gd" id="35_pass"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_d4qbf"]
 animation = &"Grip"
@@ -105,6 +121,14 @@ pocket_id = "backpack_pocket"
 grab_distance = 0.2
 snap_require = "backpack"
 
+[node name="Vignette" parent="XRCamera3D" instance=ExtResource("22_vign")]
+
+[node name="FunctionGazePointer" parent="XRCamera3D" instance=ExtResource("21_gaze")]
+enabled = false
+
+[node name="DebugHUD" parent="XRCamera3D" instance=ExtResource("34_dhud")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, -0.6)
+
 [node name="LeftHand" type="XRController3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, -0.70710677, 0, 0.70710677, 0.70710677, -0.5, 1, -0.5)
 tracker = &"left_hand"
@@ -112,6 +136,8 @@ pose = &"grip"
 show_when_tracked = true
 
 [node name="CollisionHandLeft" type="AnimatableBody3D" parent="LeftHand" node_paths=PackedStringArray("hand_skeleton")]
+collision_layer = 131072
+collision_mask = 262175
 sync_to_physics = false
 script = ExtResource("3_d4qbf")
 hand_skeleton = NodePath("LeftHandModel/Hand_Nails_low_L/Armature/Skeleton3D")
@@ -186,6 +212,10 @@ transparent = 0
 unshaded = true
 scene_properties_keys = PackedStringArray("zone_wrist_ui.gd")
 
+[node name="FunctionTeleport" parent="LeftHand/CollisionHandLeft" instance=ExtResource("20_tele")]
+
+[node name="FunctionPoseDetector" parent="LeftHand/CollisionHandLeft" instance=ExtResource("23_pose")]
+
 [node name="RightHand" type="XRController3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, -0.70710677, 0, 0.70710677, 0.70710677, 0.5, 1, -0.5)
 tracker = &"right_hand"
@@ -193,6 +223,8 @@ pose = &"grip"
 show_when_tracked = true
 
 [node name="CollisionHandRight" type="AnimatableBody3D" parent="RightHand" node_paths=PackedStringArray("hand_skeleton")]
+collision_layer = 131072
+collision_mask = 262175
 sync_to_physics = false
 script = ExtResource("3_d4qbf")
 hand_skeleton = NodePath("RightHandModel/Hand_Nails_low_R/Armature/Skeleton3D")
@@ -254,6 +286,11 @@ jump_button_action = "ax_button"
 [node name="MovementCrouch" parent="RightHand/CollisionHandRight" instance=ExtResource("11_5npet")]
 crouch_button_action = "by_button"
 
+[node name="MovementGrapple" parent="RightHand/CollisionHandRight" instance=ExtResource("24_grap")]
+enabled = false
+
+[node name="FunctionPoseDetector" parent="RightHand/CollisionHandRight" instance=ExtResource("23_pose")]
+
 [node name="PlayerBody" parent="." instance=ExtResource("15_x1dm3")]
 
 [node name="LeftPocket" parent="PlayerBody" index="0" instance=ExtResource("16_4oqtv")]
@@ -279,6 +316,36 @@ mesh = SubResource("SphereMesh_1ccdy")
 [node name="HighlightRing" parent="PlayerBody/RightPocket" index="3" instance=ExtResource("17_1njvn")]
 
 [node name="MovementSprint" parent="." instance=ExtResource("18_l4ed5")]
+
+[node name="MovementPhysicalJump" parent="." instance=ExtResource("25_pjmp")]
+enabled = false
+
+[node name="MovementJog" parent="." instance=ExtResource("26_jog")]
+enabled = false
+
+[node name="MovementClimb" parent="." instance=ExtResource("27_clmb")]
+enabled = false
+
+[node name="MovementFlight" parent="." instance=ExtResource("28_flgt")]
+enabled = false
+
+[node name="MovementGlide" parent="." instance=ExtResource("29_glid")]
+enabled = false
+
+[node name="MovementWallWalk" parent="." instance=ExtResource("30_wall")]
+enabled = false
+
+[node name="MovementWorldGrab" parent="." instance=ExtResource("31_wgrb")]
+enabled = false
+
+[node name="MovementWind" parent="." instance=ExtResource("32_wind")]
+enabled = false
+
+[node name="MovementFootstep" parent="." instance=ExtResource("33_foot")]
+enabled = false
+
+[node name="PassthroughController" type="Node" parent="."]
+script = ExtResource("35_pass")
 
 [editable path="LeftHand/CollisionHandLeft/LeftHandModel"]
 [editable path="LeftHand/CollisionHandLeft/LeftHandModel/Hand_Nails_low_L"]

@@ -1,0 +1,53 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_slider.gd" id="1_r"]
+[ext_resource type="Material" path="res://assets/prototype_materials/dark_brown.tres" id="2_r"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/interactables/interactable_handle.tscn" id="3_r"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_knob"]
+albedo_color = Color(0.85, 0.65, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="Mesh_knob"]
+material = SubResource("Mat_knob")
+radius = 0.035
+height = 0.07
+
+[sub_resource type="SphereShape3D" id="Shape_knob"]
+radius = 0.045
+
+[sub_resource type="BoxMesh" id="Mesh_base"]
+size = Vector3(0.16, 0.04, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_rail"]
+size = Vector3(0.34, 0.02, 0.04)
+
+[node name="Slider" type="Node3D"]
+
+[node name="Rail" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0, 0)
+mesh = SubResource("Mesh_rail")
+surface_material_override/0 = ExtResource("2_r")
+
+[node name="InteractableSlider" type="Node3D" parent="."]
+script = ExtResource("1_r")
+slider_limit_min = 0.0
+slider_limit_max = 0.3
+
+[node name="HandleOrigin" type="Node3D" parent="InteractableSlider"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+
+[node name="InteractableHandle" parent="InteractableSlider/HandleOrigin" instance=ExtResource("3_r")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableSlider/HandleOrigin/InteractableHandle"]
+shape = SubResource("Shape_knob")
+
+[node name="Knob" type="MeshInstance3D" parent="InteractableSlider/HandleOrigin"]
+mesh = SubResource("Mesh_knob")
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Slider"
+font_size = 48
+outline_size = 8

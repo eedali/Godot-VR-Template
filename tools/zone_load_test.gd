@@ -12,6 +12,10 @@ extends SceneTree
 ##
 ## Run with:
 ##   bash tools/godot.sh --headless --xr-mode off --path . --script res://tools/zone_load_test.gd
+##
+## Feature overrides (applied through VRFeatures before the game starts):
+##   ... --script res://tools/zone_load_test.gd -- --set=player_body=false,climb=true
+##   ... --script res://tools/zone_load_test.gd -- --set=all_on
 
 
 # This script is compiled before the autoloads exist, so it must not name
@@ -32,6 +36,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	_apply_overrides()
 	change_scene_to_file("res://game/main.tscn")
 
 	# Staging
@@ -111,33 +116,82 @@ func _check_zone(game_state : Node) -> void:
 	if not rig or not rig.has_method("get_missing_paths"):
 		_fail("%s: XROrigin3D is not a PlayerRig" % zone.zone_info.zone_id)
 		return
-	for path in rig.get_missing_paths():
-		_fail("%s: feature node missing: %s" % [zone.zone_info.zone_id, path])
+	# remove_disabled_nodes frees the nodes of disabled features on purpose
+	if not rig.config.remove_disabled_nodes:
+		for path in rig.get_missing_paths():
+			_fail("%s: feature node missing: %s" % [zone.zone_info.zone_id, path])
 	if get_nodes_in_group("player_body").is_empty():
 		_fail("%s: no XRToolsPlayerBody" % zone.zone_info.zone_id)
+
+	# Without a headset the rig must add the keyboard/mouse fallback, and the
+	# player body must drive its movement providers
+	var features : Node = root.get_node("VRFeatures")
+	if features.is_enabled(&"desktop_fallback") and XRServer.primary_interface == null:
+		var fallback : Node = rig.get_node_or_null("DesktopFallback")
+		if not fallback:
+			_fail("%s: desktop fallback not added" % zone.zone_info.zone_id)
+		else:
+			var body : Node = rig.get_node("PlayerBody")
+			var direct : Node = fallback.get_node("MovementDesktopDirect")
+			if not body._movement_providers.has(direct):
+				_fail("%s: desktop movement not registered with the body" % zone.zone_info.zone_id)
 
 
 # Switch a feature at runtime and verify the rig follows
 func _check_runtime_toggle(game_state : Node) -> void:
 	var features : Node = root.get_node("VRFeatures")
 	var rig : Node = game_state.current_zone.get_node("XROrigin3D")
-	var direct : Node = rig.get_feature_node(&"direct_movement")
-	var initial : bool = features.is_enabled(&"direct_movement")
-	features.set_enabled(&"direct_movement", not initial)
-	await process_frame
-	if direct.enabled == initial:
-		_fail("runtime toggle of direct_movement did not reach the rig")
-	features.set_enabled(&"direct_movement", initial)
-	await process_frame
-	if direct.enabled != initial:
-		_fail("restoring direct_movement did not reach the rig")
-	print("zone_load_test: runtime toggle ok")
+
+	# Pick a feature whose node still exists (remove_disabled_nodes may have
+	# freed some) and that is not forced off by another feature
+	var feature := &""
+	for candidate : StringName in [&"direct_movement", &"pointer", &"wrist_ui"]:
+		var forced_off : bool = candidate == &"direct_movement" \
+				and not features.is_enabled(&"player_body")
+		if rig.get_feature_node(candidate) and not forced_off:
+			feature = candidate
+			break
+	if feature == &"":
+		print("zone_load_test: runtime toggle skipped (no switchable node left)")
+		return
+
+	var node : Node = rig.get_feature_node(feature)
+	var initial : bool = features.is_enabled(feature)
+	for value : bool in [not initial, initial]:
+		features.set_enabled(feature, value)
+		await process_frame
+		if node.enabled != rig.is_feature_active(feature) or node.enabled != value:
+			_fail("runtime toggle of %s to %s did not reach the rig" % [feature, value])
+	print("zone_load_test: runtime toggle ok (%s)" % feature)
+
+
+# Apply "--set=name=value,..." / "--set=all_on" from the user command line
+func _apply_overrides() -> void:
+	var features : Node = root.get_node("VRFeatures")
+	for arg in OS.get_cmdline_user_args():
+		if not arg.begins_with("--set="):
+			continue
+		for item in arg.trim_prefix("--set=").split(",", false):
+			if item == "all_on":
+				for feature : StringName in features.config.get_feature_names():
+					if features.config.get(feature) is bool and feature != &"remove_disabled_nodes":
+						features.set_value(feature, true)
+				continue
+			var parts := item.split("=")
+			if parts.size() != 2:
+				_fail("bad override: " + item)
+				continue
+			var text := parts[1].strip_edges()
+			var value : Variant = text.to_int() if text.is_valid_int() else text == "true"
+			features.set_value(StringName(parts[0].strip_edges()), value)
+		print("zone_load_test: overrides ", arg)
 
 
 # Wait until [param condition] returns true (polling every 0.1 s)
 func _wait_for(condition : Callable, what : String) -> bool:
 	var waited := 0.0
 	while not condition.call():
+		_press_continue_if_prompted()
 		if waited > STEP_TIMEOUT:
 			var staging : Node = current_scene
 			_fail("timeout waiting for %s (staging scene: %s)" % [
@@ -146,6 +200,17 @@ func _wait_for(condition : Callable, what : String) -> bool:
 		await create_timer(0.1).timeout
 		waited += 0.1
 	return true
+
+
+# The loading screen waits for "hold to continue" on the first load (and on
+# every load with loading_prompt on); press it like a player would
+func _press_continue_if_prompted() -> void:
+	var staging : Node = current_scene
+	if not staging or not staging.has_node("LoadingScreen"):
+		return
+	var loading_screen : Node = staging.get_node("LoadingScreen")
+	if loading_screen.visible and loading_screen.enable_press_to_continue:
+		loading_screen.continue_pressed.emit()
 
 
 func _on_scene_visible(_scene : Node, _user_data : Variant) -> void:

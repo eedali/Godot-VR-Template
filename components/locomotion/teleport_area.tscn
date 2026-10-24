@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/objects/teleport_area.tscn" id="1_r"]
+[ext_resource type="Material" path="res://assets/prototype_materials/sandstone.tres" id="2_r"]
+
+[sub_resource type="BoxShape3D" id="Shape_area"]
+size = Vector3(1, 2, 1)
+
+[sub_resource type="CylinderMesh" id="Mesh_pad"]
+top_radius = 0.5
+bottom_radius = 0.5
+height = 0.02
+
+[node name="TeleportArea" node_paths=PackedStringArray("target") instance=ExtResource("1_r")]
+target = NodePath("Destination")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("Shape_area")
+
+[node name="Pad" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
+mesh = SubResource("Mesh_pad")
+surface_material_override/0 = ExtResource("2_r")
+
+[node name="Destination" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Teleporter"
+font_size = 48
+outline_size = 8

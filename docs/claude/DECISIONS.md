@@ -109,7 +109,9 @@ Context: ARCHITECTURE §3 suggested re-parenting the hand subtree under the
 controller when collision hands are off.
 Decision: `XRToolsCollisionHand` already has `mode` (DISABLED / TELEPORT /
 COLLIDE); off sets `TELEPORT` (the body snaps to the controller every physics
-frame, never collides), on restores `COLLIDE`. No node moves, so every
+frame instead of sliding along walls), on restores `COLLIDE`. (Correction
+after review: the hand body keeps its collision layer in TELEPORT mode, so it
+can still push light rigid bodies; see D-15 for the layers.) No node moves, so every
 `FEATURE_NODES` path stays valid and the toggle works at runtime.
 Alternatives: re-parent (breaks node paths, persistence lookups and runtime
 re-enable).
@@ -138,3 +140,103 @@ Decision: `tools/zone_load_test.gd` drives the real flow (presses continue,
 runtime, saves) and is part of `--run`. It is duck-typed because `--script`
 compiles it before autoloads are registered.
 Reversible: yes — drop the block from `tools/check.sh`.
+
+### D-13 — Haptics are triggered by the rig, not by PersistentItem   (phase 4, 2026-10-24)
+Context: PLAN 4.4 says to call `Haptics` from `PersistentItem` pick-up/drop and
+from pointer presses.
+Decision: the rig connects every `FunctionPickup.has_picked_up/has_dropped`
+and every `FunctionPointer.pointing_event` (PRESSED) to `Haptics.tap/pulse`.
+This covers every pickable (PersistentItem included) and every pointer
+without touching item scripts; `Haptics` checks the `haptics` toggle itself.
+Alternatives: hooks in `PersistentItem` (misses non-persistent pickables,
+double pulses with the rig hook).
+Reversible: yes.
+
+### D-14 — `hand_tracking` toggle semantics   (phase 4, 2026-10-24)
+Context: PLAN 4.6 says "rig sets show_when_tracked from the toggle", but
+`show_when_tracked` only hides an untracked controller; it cannot tell hands
+from controllers. XR Tools hands are animated from trigger/grip values, so
+controller-free hands work once the runtime maps pinch/grasp to those actions.
+Decision: project settings enable `hand_tracking`, both hand-tracking data
+sources and `hand_interaction_profile`; `openxr_action_map.tres` gains an
+`/interaction_profiles/ext/hand_interaction_ext` profile (pinch -> trigger /
+trigger_click, grasp -> grip / grip_click, aim/grip poses). The toggle: on =
+hands may drive the controllers (default); off = a controller whose profile
+switches to the hand-interaction profile is hidden and stops processing
+(`XRController3D.profile_changed`, no polling). `show_when_tracked` stays true.
+Needs a headset test.
+Alternatives: XRHandModifier3D skeleton tracking (the XR Tools low-poly hands
+use a different bone layout; out of scope).
+Reversible: yes.
+
+### D-15 — Collision hands on the XR Tools layers   (phase 4, 2026-10-24, review finding)
+Context: the reviewer found `CollisionHandLeft/Right` (copied from main) had no
+`collision_layer`/`mask`, so they sat on layer 1 and the player body (mask
+1023) collided with its own hands.
+Decision: use the XR Tools collision-hand scene values: layer 18 "Player
+Hands" (131072), mask 262175 (layers 1-5 + 19). Behaviour change vs main; on
+the headset-test list.
+Reversible: yes.
+
+### D-16 — Feature rules inside the rig   (phase 4, 2026-10-24, review findings)
+Decision:
+- `remove_disabled_nodes` frees nodes in the rig's `_enter_tree` (children not
+  yet in the tree, so the player body never caches them); `player_body`,
+  `pickup`, `pockets` are never freed (GameState / persistence need them).
+- `player_body = false` forces every body-driven movement feature and the hip
+  pockets off and logs one warning (zone-switch areas need the body as well).
+- `flight` on -> left-hand crouch off (both use B/Y).
+- Left teleport pauses while the left pointer is on a target or the left hand
+  holds something (all three use the left trigger).
+- Switching `pickup` off drops held objects; switching `crouch` off clears the
+  crouch height override; `height_calibration` (one-shot) is only applied at
+  startup or when it changes; `has_feature()` only accepts exported settings.
+- Held items restored on zone load only attach to an enabled pickup, otherwise
+  they drop at the hand as zone items.
+Reversible: yes.
+
+### D-17 — Staging-level settings applied by GameStaging   (phase 4, 2026-10-24)
+Context: `target_refresh_rate`, `physics_rate_multiplier` and `loading_prompt`
+must be in place before the first zone (the start scene has no rig).
+Decision: `game/main.gd` forwards the rates to `StartXR` in `_ready` (before
+the OpenXR session begins) and re-applies them at runtime; it also owns
+`loading_prompt`. The rig lists them in `EXTERNAL_FEATURES`, and the smoke
+test fails if any config setting is handled nowhere.
+Reversible: yes.
+
+### D-18 — Desktop fallback: runtime input actions, deferred instancing   (phase 4, 2026-10-24)
+Context: the XR Tools desktop nodes default to actions that do not exist in
+this project (`action_crouch`, `action_sprint`, `trigger_click` as an InputMap
+action) and the pointer/hiders must live under the camera/controllers.
+Decision: `DesktopFallback` registers `desktop_*` actions (WASD/arrows, Space,
+C/Ctrl, Shift, left mouse) at runtime if missing, creates the pointer and the
+controller hiders in the right places, and the rig instances it (deferred)
+only when `XRServer.primary_interface` is null, then refreshes the player
+body's cached provider list.
+Reversible: yes.
+
+### D-19 — Debug HUD shows memory instead of battery   (phase 4, 2026-10-24)
+Context: ARCHITECTURE §5 asked for `OS.get_power_percent_left()`; it does not
+exist in Godot 4.6 (probed with ClassDB).
+Decision: show FPS, frame/physics time, draw calls, physics rate and static
+memory; documented.
+Reversible: yes.
+
+### D-20 — `persistent_zone.tscn` rebuilt; `zone_base.tscn` inherits it   (phase 4, 2026-10-24, review finding)
+Context: the reviewer noted `components/persistent/persistent_zone.tscn` still
+inherited XR Tools `scene_base.tscn` (bare origin, no rig) and was unused.
+Decision: it is now the generic zone root (Node3D + `persistent_zone.gd` +
+PlayerRig as `XROrigin3D`); `game/zones/zone_base.tscn` inherits it so a game
+can add what all its zones share. Node paths and indices of the demo zones are
+unchanged.
+Reversible: yes.
+
+### D-21 — Zone-side toggles through `FeatureGate`   (phase 4, 2026-10-24)
+Context: `virtual_keyboard` (and any zone content a game wants to tie to a
+toggle) lives in zones, not on the rig.
+Decision: `components/system/feature_gate.gd` — a child node that hides and
+disables its parent (process mode, so bodies/areas leave the physics
+simulation) while a feature is off, following runtime changes. Climbable
+walls, teleport/world-grab/wind areas are not gated: without their movement
+provider they are inert scenery.
+Reversible: yes.

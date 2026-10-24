@@ -109,7 +109,7 @@ after 3.6 separately.
 - [x] 3.6 `bash tools/check.sh --run` green; also run the headless main scene
       and confirm the start menu → zone load path has no `SCRIPT ERROR`.
       **Commit, push.**
-- [ ] 3.7 Run the `godot-reviewer` subagent on `git diff main...HEAD -- components game`
+- [x] 3.7 Run the `godot-reviewer` subagent on `git diff main...HEAD -- components game`
       and fix every `high` finding.
 
 **Acceptance:** zones are thin; the rig is the only place mechanics live;
@@ -123,38 +123,38 @@ shows the node disabled (log a line from `_apply_all` in debug builds).
 Wire every `addon` row of `FEATURES.md` into the rig (default state per the
 matrix) and write the `custom` components:
 
-- [ ] 4.1 Locomotion: teleport, physical jump, jog, climb, flight, glide,
+- [x] 4.1 Locomotion: teleport, physical jump, jog, climb, flight, glide,
       grapple, wall walk, world grab, wind, footsteps. Respect each script's
       documented parent requirement (read the `##` header of each
       `addons/godot-xr-tools/functions/movement_*.gd`). Keep distinct `order`
       values so providers do not fight (teleport before direct; climb/world-grab
       before body physics; see XR Tools docs).
-- [ ] 4.2 Comfort: `effects/vignette.tscn` under the camera (`vignette`,
+- [x] 4.2 Comfort: `effects/vignette.tscn` under the camera (`vignette`,
       `vignette_auto_adjust`), `head_behavior`, `player_body`, `loading_prompt`
       (wired to `GameStaging.prompt_for_continue`).
-- [ ] 4.3 Hands/interaction: gaze pointer, hand-pose detectors, `laser_visible`,
+- [x] 4.3 Hands/interaction: gaze pointer, hand-pose detectors, `laser_visible`,
       `ranged_pickup`, `collision_hands` off-path (re-parent to plain controller
       child), `hand_models` off (hide + disable AnimationTree).
-- [ ] 4.4 `components/feedback/haptics.gd` + `tap.tres`; call it from
+- [x] 4.4 `components/feedback/haptics.gd` + `tap.tres`; call it from
       `PersistentItem` pick-up/drop and from pointer press (guarded by toggle).
-- [ ] 4.5 `components/system/passthrough_controller.gd` + project setting
+- [x] 4.5 `components/system/passthrough_controller.gd` + project setting
       `xr/openxr/environment_blend_mode` left at opaque (runtime switch only);
       verify with a headless run that calling it without an XR interface is a
       no-op with a `push_warning`, not an error.
-- [ ] 4.6 Hand tracking: `project.godot` → `xr/openxr/extensions/hand_tracking=true`,
+- [x] 4.6 Hand tracking: `project.godot` → `xr/openxr/extensions/hand_tracking=true`,
       `xr/openxr/extensions/hand_interaction_profile=true`; rig sets
       `show_when_tracked` from the toggle. Document that controller-free hand
       tracking still needs a headset test.
-- [ ] 4.7 `components/system/desktop_fallback.tscn` grouping the XR Tools
+- [x] 4.7 `components/system/desktop_fallback.tscn` grouping the XR Tools
       desktop-support nodes; the rig instances it only when XR failed to start
       (`XRServer.primary_interface == null` after `StartXR.xr_failed_to_initialize`).
-- [ ] 4.8 `components/system/debug_hud.tscn` (+ `.gd`), default off, never in
+- [x] 4.8 `components/system/debug_hud.tscn` (+ `.gd`), default off, never in
       release (`OS.is_debug_build()` check).
-- [ ] 4.9 Interactables prefabs in `components/interactables/` (one scene per
+- [x] 4.9 Interactables prefabs in `components/interactables/` (one scene per
       XR Tools interactable with sensible defaults + a `Label3D` title) and
       `components/locomotion/` zone-side prefabs (teleport area, world grab
       area, wind area, climbable wall).
-- [ ] 4.10 Extend `FEATURE_NODES` + smoke-test assertions for every new node.
+- [x] 4.10 Extend `FEATURE_NODES` + smoke-test assertions for every new node.
       Check green. Commit (one commit per sub-area is fine), push.
 - [ ] 4.11 `godot-reviewer` pass on the diff; fix `high` findings.
 

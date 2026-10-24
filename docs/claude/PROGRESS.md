@@ -11,7 +11,7 @@ every "done" must name the log file or command that proved it.
 | 1 Audit fixes | done | d15845b, (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED (`build/claude-logs/run.log`) | A6 skipped (`[~]`, D-4); gdlint now clean |
 | 2 Feature config | done | (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED; smoke log `VRFeatureConfig exposes 44 settings`; headless probe: `VRFeatures.is_enabled(&"teleport") == true`, `set_value(&"teleport", 0)` → false, unknown name → warning | 44 settings |
 | 3 PlayerRig refactor | done | 8879e3e, (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED incl. new `tools/zone_load_test.gd` (start scene → new game → all 3 zones, runtime toggle, save) `build/claude-logs/zones.log`; startup toggle proven with a temporary `direct_movement = false` config (`zones-direct-off.log`: `VRFeatures: direct_movement -> off (MovementDirect)` ×2 at zone load) | see node counts below |
-| 4 Mechanics & components | todo | | | |
+| 4 Mechanics & components | done | (this) | `bash tools/check.sh --run` -> ALL CHECKS PASSED: smoke (43 rig paths, every setting handled), zone test x3 (default / `--set=all_on` / minimal + `remove_disabled_nodes`) in `build/claude-logs/zones*.log`; passthrough without XR -> only `WARNING: PassthroughController: no active XR interface` | review findings 1-8 fixed |
 | 5 Showcase & menu | todo | | | |
 | 6 Platform / export / CI | todo | | | |
 | 7 Docs | todo | | | |
@@ -63,6 +63,18 @@ _None yet._
 ## Needs headset test
 
 _Append one line per item: feature — what to do on the Quest 3 — what to expect._
+
+- hand tracking — put the controllers down, raise both hands — hands follow, pinch clicks UI / starts the left teleport, grasp picks up; with `hand_tracking = false` the hands disappear instead
+- passthrough — set `passthrough = true` (or toggle at runtime) — camera feed replaces the sky, zone geometry stays; `false` restores the sky
+- teleport — hold the left trigger away from UI — arc visible in gl_compatibility, release teleports; trigger on a UI panel clicks without teleporting
+- vignette — smooth-turn and walk — tunnel fades in while moving, out when still; `vignette_auto_adjust = false` gives a permanent 0.8 tunnel
+- collision hands (now layer 18) — push the hands into a wall/table, reach for hip/back pockets — hands stop at surfaces, the body no longer bumps into its own hands
+- collision hands off — `collision_hands = false` — hands follow the controllers exactly and pass through walls
+- climb + world grab + collision hands — enable `climb`/`world_grab`, use the showcase wall/area — grabbing pulls the player, hands do not jitter
+- flight — `flight = true`, press left B/Y — toggles flying; left crouch does nothing, right crouch still works
+- refresh rate — `target_refresh_rate` 72 / 90 / 120 — headset switches rate (log: "StartXR: Setting refresh rate to ...")
+- haptics — pick up / drop an item, press a UI button — short tick on that controller; `haptics = false` silences it
+- debug HUD — `debug_hud = true` in a debug build — panel below the view shows FPS/frame time; absent in a release export
 
 ## Push log
 
