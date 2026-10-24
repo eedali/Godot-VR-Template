@@ -49,6 +49,22 @@ func new_game(difficulty := GameDifficulty.GAME_NORMAL) -> bool:
 	return load_world_state()
 
 
+## This method starts a new game in a specific zone instead of the
+## [member starting_zone] (used by the start menu's Showcase button).
+func new_game_in_zone(
+		zone : PersistentZoneInfo,
+		difficulty := GameDifficulty.GAME_NORMAL) -> bool:
+	if not zone:
+		push_error("GameState.new_game_in_zone: zone is null")
+		return false
+
+	# Clear game data, then point the world state at the requested zone
+	clear_all()
+	game_difficulty = difficulty
+	set_value("current_zone_id", zone.zone_id)
+	return load_world_state()
+
+
 ## This method loads a game from the specified save-game.
 func load_game(p_name : String) -> bool:
 	# Read data from the save-game file

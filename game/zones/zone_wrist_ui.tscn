@@ -1,11 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://b3bubdytjn523"]
+[gd_scene load_steps=3 format=3 uid="uid://b3bubdytjn523"]
 
 [ext_resource type="Script" path="res://game/zones/zone_wrist_ui.gd" id="1_3c68p"]
+[ext_resource type="Resource" path="res://game/zones/showcase/showcase_zone_info.tres" id="2_show"]
 
 [node name="ZoneWristMenu" type="PanelContainer"]
 offset_right = 400.0
 offset_bottom = 200.0
 script = ExtResource("1_3c68p")
+showcase_zone = ExtResource("2_show")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -26,7 +28,7 @@ autowrap_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 50
+theme_override_constants/separation = 30
 alignment = 1
 
 [node name="SaveButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
@@ -38,5 +40,10 @@ text = "Save"
 layout_mode = 2
 text = "Quit"
 
+[node name="ShowcaseButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Showcase"
+
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/SaveButton" to="." method="_on_save_button_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ShowcaseButton" to="." method="_on_showcase_button_pressed"]

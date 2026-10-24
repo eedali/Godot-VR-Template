@@ -240,3 +240,15 @@ simulation) while a feature is off, following runtime changes. Climbable
 walls, teleport/world-grab/wind areas are not gated: without their movement
 provider they are inert scenery.
 Reversible: yes.
+
+### D-22 — Showcase helpers: FeatureStatusLabel and FeatureToggleButton   (phase 5, 2026-10-24)
+Context: the showcase must show every mechanic, but most exotic ones ship off,
+and the comfort kiosk needs passthrough / debug-HUD toggle buttons.
+Decision: each station has a `FeatureStatusLabel` (Label3D listing the live
+on/off state of its toggles, signal-driven); kiosk buttons are the
+`push_button` prefab plus a `FeatureToggleButton` node that flips a feature
+through `VRFeatures`. Both are reusable components in `components/system/`.
+The showcase spawns players at `FromAnywhere`; its portal returns to Outside
+at that zone's default spawn. The wrist menu "Showcase" button is meant for
+testing and documented as removable.
+Reversible: yes.

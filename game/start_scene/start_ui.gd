@@ -5,7 +5,8 @@ extends CenterContainer
 ##
 ## The 2D menu shown on the start scene screen. It switches between the main
 ## menu, new-game, load-game and options panes and starts the game through
-## the [GameState] autoload.
+## the [GameState] autoload. The options pane embeds the XR Tools user
+## settings UI (snap turning, dead zones, haptics, player height).
 
 
 ## Panes of the start menu
@@ -16,6 +17,9 @@ enum Pane {
 	OPTIONS,
 }
 
+
+## Zone started by the "Showcase" button of the new-game pane
+@export var showcase_zone : PersistentZoneInfo
 
 ## Names of the save games shown in the load-game pane
 var save_list : Array[String] = []
@@ -76,6 +80,10 @@ func _on_normal_btn_pressed() -> void:
 
 func _on_hard_btn_pressed() -> void:
 	GameState.new_game(GameState.GameDifficulty.GAME_HARD)
+
+
+func _on_showcase_btn_pressed() -> void:
+	GameState.new_game_in_zone(showcase_zone)
 
 
 func _on_back_btn_pressed() -> void:

@@ -86,7 +86,35 @@ func _run() -> void:
 	if not game_state.save_world_state():
 		_fail("GameState.save_world_state() returned false")
 
+	await _check_showcase_entry_points(game_state, staging, first_zone)
 	_finish()
+
+
+# The wrist menu "Showcase" button (from another zone) and the start menu
+# "Showcase" button (after quitting to the menu) must both reach the showcase
+func _check_showcase_entry_points(game_state : Node, staging : Node, first_zone : Resource) -> void:
+	staging.load_scene(first_zone.instance_scene)
+	if not await _wait_for_zone(game_state, first_zone.zone_id):
+		return
+	var wrist_ui : Node = game_state.current_zone.get_node_or_null(
+			"XROrigin3D/LeftHand/CollisionHandLeft/WristUI")
+	if wrist_ui and wrist_ui.get_scene_instance():
+		wrist_ui.get_scene_instance()._on_showcase_button_pressed()
+		if await _wait_for_zone(game_state, "zone_showcase"):
+			print("zone_load_test: wrist menu -> showcase ok")
+	else:
+		print("zone_load_test: wrist menu check skipped (no wrist UI)")
+
+	var visible_before := _visible_scenes
+	if not game_state.quit_game():
+		_fail("GameState.quit_game() returned false")
+		return
+	if not await _wait_for_visible(visible_before + 1, "start scene after quit"):
+		return
+	var start_ui : Node = staging.current_scene.get_node("Screen").get_scene_instance()
+	start_ui._on_showcase_btn_pressed()
+	if await _wait_for_zone(game_state, "zone_showcase"):
+		print("zone_load_test: start menu -> showcase ok")
 
 
 # Wait until the GameState reports the given zone as current and it has

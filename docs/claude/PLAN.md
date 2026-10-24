@@ -165,17 +165,17 @@ the rig; the smoke test asserts every path; the headless run is clean.
 
 ## Phase 5 — Showcase zone & menu (`feat:`)
 
-- [ ] 5.1 Build `game/zones/showcase/showcase_zone.tscn` + `showcase_zone_info.tres`
+- [x] 5.1 Build `game/zones/showcase/showcase_zone.tscn` + `showcase_zone_info.tres`
       per `ARCHITECTURE.md §6` with the five stations and `Label3D` titles.
       Use the existing prototype materials; no new art.
-- [ ] 5.2 Register it in `game/zones/zone_database.tres`.
-- [ ] 5.3 Start menu: "New Game" pane gets a **Showcase** button that calls a new
+- [x] 5.2 Register it in `game/zones/zone_database.tres`.
+- [x] 5.3 Start menu: "New Game" pane gets a **Showcase** button that calls a new
       `GameState.new_game_in_zone(zone_info)`; Options pane embeds
       `addons/godot-xr-tools/user_settings/user_settings_ui.tscn` with a working
       Back button (`start_ui.gd`).
-- [ ] 5.4 Add a "Showcase" entry to the wrist UI (zone switch) so testers can
+- [x] 5.4 Add a "Showcase" entry to the wrist UI (zone switch) so testers can
       jump there from any zone.
-- [ ] 5.5 Check green (`--run`). Commit, push.
+- [x] 5.5 Check green (`--run`). Commit, push.
 
 **Acceptance:** showcase loads headless without errors; zone database has 4 zones;
 Options pane shows the settings UI.
