@@ -92,14 +92,14 @@ Per `ARCHITECTURE.md §1–2`:
 Per `ARCHITECTURE.md §3–4`. This is the riskiest phase; commit after 3.3 and
 after 3.6 separately.
 
-- [ ] 3.1 Create `components/player/player_rig.tscn` + `player_rig.gd`
+- [x] 3.1 Create `components/player/player_rig.tscn` + `player_rig.gd`
       containing **everything** `zone_base.tscn` has today (camera near plane
       0.03, grip pose, collision hands, low-poly hands with bone poses, pokes,
       pointers, pickups, direct/strafe, jump, crouch, turn, sprint, pockets,
       wrist UI, highlight rings). Reproduce the transforms exactly.
-- [ ] 3.2 Add `FEATURE_NODES` mapping + `_apply_all` / `_on_feature_changed`
+- [x] 3.2 Add `FEATURE_NODES` mapping + `_apply_all` / `_on_feature_changed`
       logic; implement the special cases listed in `ARCHITECTURE.md §3`.
-- [ ] 3.3 Extend `tools/smoke_test.gd`: instantiate the rig and assert every
+- [x] 3.3 Extend `tools/smoke_test.gd`: instantiate the rig and assert every
       `FEATURE_NODES` path exists (`has_node`). Check green. **Commit.**
 - [ ] 3.4 Rewrite `game/zones/zone_base.tscn` as a non-inheriting scene with
       the rig instanced as `XROrigin3D` (see inheritance constraint).

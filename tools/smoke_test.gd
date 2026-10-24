@@ -51,6 +51,9 @@ const REQUIRED_FEATURES : Array[StringName] = [
 ## Minimum number of settings the feature configuration must expose
 const MIN_FEATURE_COUNT : int = 40
 
+## Player rig scene whose FEATURE_NODES / SETTING_NODES paths must all exist
+const PLAYER_RIG_SCENE := "res://components/player/player_rig.tscn"
+
 ## Script and default resource of the feature configuration
 const FEATURE_CONFIG_SCRIPT := "res://config/vr_feature_config.gd"
 const FEATURE_CONFIG_DEFAULT := "res://config/vr_features_default.tres"
@@ -75,6 +78,7 @@ func _run() -> void:
 		_check(file)
 
 	_check_feature_config()
+	_check_player_rig()
 
 	print("smoke_test: %d files checked, %d failure(s)" % [_checked, _failures.size()])
 	for failure in _failures:
@@ -183,3 +187,31 @@ func _check_feature_config() -> void:
 		_failures.append("project.godot (VRFeatures autoload missing)")
 	elif not features.config or features.config.get_script() != script:
 		_failures.append("VRFeatures (active config is not a VRFeatureConfig)")
+
+
+## Instantiate the player rig and assert every feature node path exists, so a
+## renamed or moved node fails the check instead of silently disabling a
+## feature at runtime.
+func _check_player_rig() -> void:
+	var scene := load(PLAYER_RIG_SCENE) as PackedScene
+	if not scene:
+		_failures.append(PLAYER_RIG_SCENE + " (cannot load)")
+		return
+	var rig := scene.instantiate()
+	if not rig or not rig.has_method("get_all_feature_paths"):
+		_failures.append(PLAYER_RIG_SCENE + " (root is not a PlayerRig)")
+		if rig:
+			rig.free()
+		return
+
+	var config : Resource = load(FEATURE_CONFIG_SCRIPT).new()
+	var paths : Array = rig.get_all_feature_paths()
+	for path : String in paths:
+		if not rig.has_node(path):
+			_failures.append(PLAYER_RIG_SCENE + " (feature node missing: %s)" % path)
+	for table : Dictionary in [rig.FEATURE_NODES, rig.SETTING_NODES]:
+		for feature : StringName in table:
+			if not config.has_feature(feature):
+				_failures.append(PLAYER_RIG_SCENE + " (unknown feature in rig: %s)" % feature)
+	print("smoke_test: PlayerRig has %d feature node paths" % paths.size())
+	rig.free()
