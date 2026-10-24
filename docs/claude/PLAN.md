@@ -38,23 +38,25 @@ Branch: `claude/template-overhaul`. Commit prefix per phase is given below.
 
 Work through `docs/claude/AUDIT.md`:
 
-- [ ] 1.1 A1 — `persistent_zone.gd`: clear `current_zone` after saving; add
+- [x] 1.1 A1 — `persistent_zone.gd`: clear `current_zone` after saving; add
       `is_instance_valid` guards in `game_state.gd` (`save_world_state`,
       `quit_game`, `load_world_state`).
-- [ ] 1.2 A2/A3 — `game_state.gd`: default + type-check `game_difficulty` on load.
-- [ ] 1.3 A4 — `start_ui.gd`: enum for panes, remove debug prints, typed vars.
-- [ ] 1.4 A5 — `zone_switch_area.gd`: modern signal connect, skip in editor.
-- [ ] 1.5 A6 (optional) — try the headless re-save from `GODOT_NOTES.md §4`;
+- [x] 1.2 A2/A3 — `game_state.gd`: default + type-check `game_difficulty` on load.
+- [x] 1.3 A4 — `start_ui.gd`: enum for panes, remove debug prints, typed vars.
+- [x] 1.4 A5 — `zone_switch_area.gd`: modern signal connect, skip in editor.
+- [~] 1.5 A6 (optional) — try the headless re-save from `GODOT_NOTES.md §4`;
       keep it only if the diff is limited to `uid=` additions, otherwise
       `git checkout -- game components` and mark `[~]`.
-- [ ] 1.6 A7 — fix `script_class` headers in the three `*_zone_info.tres`.
-- [ ] 1.7 C1 — remove stale `exclude_filter` entries from `export_presets.cfg`.
-- [ ] 1.8 D3 — add `.gdlintrc` (from `gdlint --dump-default-config` if available;
+      _Skipped: a `--script` re-save **removed** every `uid=` (and the scenes' own
+      header uids) instead of adding them; reverted (D-4)._
+- [x] 1.6 A7 — fix `script_class` headers in the three `*_zone_info.tres`.
+- [x] 1.7 C1 — remove stale `exclude_filter` entries from `export_presets.cfg`.
+- [x] 1.8 D3 — add `.gdlintrc` (from `gdlint --dump-default-config` if available;
       otherwise write a minimal YAML with `max-line-length: 100` and
       `function-name: "(_on_[A-Za-z0-9]+(_[a-z0-9]+)*|_?[a-z][a-z0-9]*(_[a-z0-9]+)*)"`),
       lint `components game tools` locally if `gdlint` exists and fix findings.
-- [ ] 1.9 Add `.editorconfig` (provided in this package) — verify it is present.
-- [ ] 1.10 `bash tools/check.sh --run` green. Commit, push.
+- [x] 1.9 Add `.editorconfig` (provided in this package) — verify it is present.
+- [x] 1.10 `bash tools/check.sh --run` green. Commit, push.
 
 **Acceptance:** all A-items and C1 closed; check green; no behaviour change
 other than bug fixes.

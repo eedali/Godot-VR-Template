@@ -43,3 +43,30 @@ default (true) so real players still learn why VR did not start.
 Alternatives: set `xr/openxr/startup_alert=false` project-wide (hides a useful
 message from players and testers with a misconfigured runtime).
 Reversible: yes — remove `--xr-mode off` from `RUN_FLAGS`.
+
+### D-3 — Normalise `export_presets.cfg` line endings   (phase 1, 2026-10-24)
+Context: the committed file had `CR CR LF` line endings (git stored it as
+binary, `-text`), so any text tool edit produced a whole-file diff.
+Decision: strip every `CR` (LF only, as `.gitattributes` asks) in the same
+commit that removes the stale Godot 3 `exclude_filter` values (AUDIT C1).
+`git diff -w` shows only the three filter lines.
+Alternatives: keep the broken endings (every later edit would be unreadable).
+Reversible: yes — git history.
+
+### D-4 — Skip the headless scene re-save (A6)   (phase 1, 2026-10-24)
+Context: GODOT_NOTES §4 suggests re-saving scenes from a `--script` run to add
+`uid=` to path-only `ext_resource` lines.
+Decision: tried it; `ResourceSaver.save` in a SceneTree script **dropped** every
+existing `uid=` (including the scenes' header uids) and rewrote typed arrays.
+Reverted with `git checkout -- game components`, removed the helper script,
+marked 1.5 `[~]`. Path-only references keep working; the editor adds uids the
+next time a scene is saved by hand.
+Alternatives: hand-add uids (error-prone; GODOT_NOTES says never hand-write uids).
+Reversible: n/a.
+
+### D-5 — Fix the `script_class` header of the item-type resources too   (phase 1, 2026-10-24)
+Context: AUDIT A7 named the three `*_zone_info.tres`; the four
+`game/items/*/*_type.tres` had the same stale header (`ItemType` vs
+`PersistentItemType`).
+Decision: fixed all seven headers.
+Reversible: yes.
