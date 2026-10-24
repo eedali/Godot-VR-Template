@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3]
+[gd_scene load_steps=43 format=3]
 
 [ext_resource type="PackedScene" uid="uid://cvn48xcmsmkrb" path="res://game/zones/zone_base.tscn" id="1_base"]
 [ext_resource type="Resource" path="res://game/zones/showcase/showcase_zone_info.tres" id="2_info"]
@@ -70,6 +70,9 @@ size = Vector3(2, 3, 0.1)
 
 [sub_resource type="BoxShape3D" id="Shape_portal"]
 size = Vector3(2, 3, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_fall"]
+size = Vector3(80, 2, 80)
 
 [node name="ShowcaseZone" instance=ExtResource("1_base")]
 zone_info = ExtResource("2_info")
@@ -155,7 +158,7 @@ features = Array[StringName]([&"teleport", &"climb", &"grapple", &"wall_walk", &
 per_line = 3
 
 [node name="TeleportArea" parent="LocomotionField" instance=ExtResource("10_tele")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 2)
 
 [node name="ClimbableWall" parent="LocomotionField" instance=ExtResource("11_climb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
@@ -199,29 +202,29 @@ mesh = SubResource("Mesh_table")
 shape = SubResource("Shape_table")
 
 [node name="PushButton" parent="InteractionTable" instance=ExtResource("16_btn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.9, 0.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.92, 0.2)
 
 [node name="Lever" parent="InteractionTable" instance=ExtResource("17_lever")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.9, 0.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.92, 0.2)
 
 [node name="Slider" parent="InteractionTable" instance=ExtResource("18_slider")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.91, 0.25)
 
 [node name="Joystick" parent="InteractionTable" instance=ExtResource("19_joy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0.9, 0.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0.92, 0.2)
 
 [node name="SnapZone" parent="InteractionTable" instance=ExtResource("20_snap")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 1, -0.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 1.06, -0.25)
 
 [node name="HandPoseArea" parent="InteractionTable" instance=ExtResource("21_pose")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 1.2, 0.25)
 
 [node name="Crate" parent="InteractionTable" instance=ExtResource("26_crate")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.2, -0.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 0.3)
 item_id = "crate_showcase_1"
 
 [node name="Rock" parent="InteractionTable" instance=ExtResource("27_rock")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1, -0.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.06, -0.25)
 item_id = "rock_showcase_1"
 
 [node name="UIStation" type="Node3D" parent="."]
@@ -267,9 +270,9 @@ per_line = 3
 
 [node name="SettingsScreen" parent="ComfortKiosk" instance=ExtResource("23_vp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
-screen_size = Vector2(1.2, 0.72)
+screen_size = Vector2(1.1, 0.8)
 scene = ExtResource("25_settings")
-viewport_size = Vector2(300, 180)
+viewport_size = Vector2(220, 160)
 update_mode = 2
 throttle_fps = 15.0
 transparent = 0
@@ -285,7 +288,7 @@ mesh = SubResource("Mesh_pedestal")
 shape = SubResource("Shape_pedestal")
 
 [node name="PassthroughButton" parent="ComfortKiosk" instance=ExtResource("16_btn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1, 0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1.02, 0.6)
 
 [node name="Title" parent="ComfortKiosk/PassthroughButton" index="3"]
 text = "Passthrough"
@@ -305,7 +308,7 @@ mesh = SubResource("Mesh_pedestal")
 shape = SubResource("Shape_pedestal")
 
 [node name="DebugHUDButton" parent="ComfortKiosk" instance=ExtResource("16_btn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 0.6)
 
 [node name="Title" parent="ComfortKiosk/DebugHUDButton" index="3"]
 text = "Debug HUD"
@@ -325,7 +328,7 @@ mesh = SubResource("Mesh_pedestal")
 shape = SubResource("Shape_pedestal")
 
 [node name="VignetteButton" parent="ComfortKiosk" instance=ExtResource("16_btn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 1, 0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 1.02, 0.6)
 
 [node name="Title" parent="ComfortKiosk/VignetteButton" index="3"]
 text = "Vignette"
@@ -389,6 +392,13 @@ zone_scene = "res://game/zones/outside/outside_zone.tscn"
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PersistenceCorner/ToOutside"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 3)
 shape = SubResource("Shape_portal")
+
+[node name="FallReset" parent="." instance=ExtResource("29_switch")]
+spawn_node_name = "FromAnywhere"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FallReset"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
+shape = SubResource("Shape_fall")
 
 [node name="FromAnywhere" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)

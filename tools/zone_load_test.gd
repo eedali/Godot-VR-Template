@@ -73,6 +73,7 @@ func _run() -> void:
 	_check_zone(game_state)
 	await _check_runtime_toggle(game_state)
 	_check_trigger_rules(game_state)
+	await _check_container_pocket_round_trip(game_state, staging)
 
 	# Every other zone in the database
 	for zone : Resource in game_state.zone_database.zones:
@@ -192,6 +193,40 @@ func _check_runtime_toggle(game_state : Node) -> void:
 		if node.enabled != rig.is_feature_active(feature) or node.enabled != value:
 			_fail("runtime toggle of %s to %s did not reach the rig" % [feature, value])
 	print("zone_load_test: runtime toggle ok (%s)" % feature)
+
+
+# An item stored in a container pocket (the toolbox) must still be in it
+# after the zone is saved and reloaded. Container pockets are disabled while
+# their container is not held, which once broke restoring them.
+func _check_container_pocket_round_trip(game_state : Node, staging : Node) -> void:
+	var pocket := _find_persistent(game_state.current_zone, "pocket_id", "toolbox_pocket_1")
+	var item := _find_persistent(game_state.current_zone, "item_id", "rock_outside_1")
+	if not pocket or not item:
+		print("zone_load_test: container pocket check skipped (no toolbox / rock here)")
+		return
+
+	pocket.pick_up_object(item)
+	await process_frame
+	var zone_info : Resource = game_state.current_zone.zone_info
+	staging.load_scene(zone_info.instance_scene)
+	if not await _wait_for_zone(game_state, zone_info.zone_id):
+		return
+
+	pocket = _find_persistent(game_state.current_zone, "pocket_id", "toolbox_pocket_1")
+	await process_frame
+	var held : Node = pocket.picked_up_object if pocket else null
+	if not held or held.get("item_id") != "rock_outside_1":
+		_fail("toolbox pocket lost its item across a save/reload (holds %s)" % held)
+	else:
+		print("zone_load_test: container pocket round trip ok")
+
+
+# Find a node in the "persistent" group below [param root] by a property value
+func _find_persistent(root : Node, property : String, value : String) -> Node:
+	for node in get_nodes_in_group("persistent"):
+		if root.is_ancestor_of(node) and node.get(property) == value:
+			return node
+	return null
 
 
 # Aiming the teleport (left trigger) pauses left-stick movement, and a

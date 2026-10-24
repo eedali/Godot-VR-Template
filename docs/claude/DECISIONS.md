@@ -309,3 +309,30 @@ Decision (all fixed):
 - Not changed: small per-tick cost of a few disabled XR Tools nodes (ray casts,
   wind area) — documented; `remove_disabled_nodes = true` recommended for Quest.
 Reversible: yes.
+
+### D-27 — Final review fixes   (phase 8, 2026-10-24)
+Context: the third `godot-reviewer` pass (commits after d585995) returned
+VERDICT FIX with one high finding: the D-26 pocket gate (`if enabled:`) stopped
+container pockets (toolbox, backpack) from being refilled on load, because
+`held_behavior` keeps them disabled while their container lies around
+(reproduced headless).
+Decision:
+- High: pockets switched off by the `pockets` feature are marked with the
+  meta flag `PersistentPocket.FEATURE_DISABLED_META` by the rig; only those
+  skip refilling. `tools/zone_load_test.gd` now does a toolbox save/reload
+  round trip; with the old gate restored it fails
+  (`build/claude-logs/zones-regression.log`), with the fix it passes.
+- Shared triggers decide once per press (`_press_owner_busy`): a laser
+  leaving a panel mid-press no longer starts a teleport/grapple; a lost
+  controller clears its press.
+- Ignored hand-tracked controllers turn `show_when_tracked` off (XRNode3D
+  re-shows tracked nodes on every pose update in 4.6).
+- Start menu Options: settings UI min width 280 px, Back button font 16
+  (measured headless: sliders 170 px wide, Back button inside the 300x200
+  viewport). Showcase settings screen 220x160 px / 1.1 x 0.8 m.
+- Showcase layout: crate on the ground beside the table, rock/snap zone and
+  interactables no longer inside the table, teleporter moved so its
+  destination is clear of the world-grab area, a fall-reset area 10 m below
+  the arena reloads the zone; the requirement warning only mentions the body
+  when the body is missing.
+Reversible: yes.

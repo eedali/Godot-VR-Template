@@ -15,7 +15,7 @@ every "done" must name the log file or command that proved it.
 | 5 Showcase & menu | done | (this) | `bash tools/check.sh --run` -> ALL CHECKS PASSED; `zones.log`: showcase loads in all 3 configs, "wrist menu -> showcase ok", "start menu -> showcase ok"; zone database has 4 zones; Options pane instances `user_settings_ui.tscn` (smoke test loads it) | 5 stations with live FeatureStatusLabels |
 | 6 Platform / export / CI | done | (this) | `bash tools/check.sh --export` -> PASS (`build/windows/Game.exe` 100 MB + `Game.pck` 16.6 MB, `export-windows.log`); exported `Game.console.exe --headless --xr-mode off --quit-after 300` exits 0 with no errors (`exported-run.log`); both workflows parse with `yaml.safe_load`, no tabs; GitHub Actions on this branch: see push log | export templates 4.6.stable present locally |
 | 7 Docs | done | (this) | relative-link check over README.md + docs/*.md: no broken links; `bash tools/check.sh` green | README rewritten; FEATURES, HOWTO_TOGGLE, HOWTO_NEW_GAME, CHANGELOG, VERSIONS entry |
-| 8 Final verification & push | todo | | | |
+| 8 Final verification & push | done | 7903c1e, (this) | `bash tools/check.sh --run --export` -> ALL CHECKS PASSED (import, smoke, gdlint, headless run, zone test x3 incl. container-pocket round trip / trigger rules / both showcase entry points, Windows export); GitHub Actions green for 09ba5f7, fec31f6, 7903c1e on all 4 platforms; three godot-reviewer passes, every high/medium finding fixed (D-15/16, D-26, D-27) | PR opened (see push log) |
 
 Status values: `todo` · `in progress` · `done` · `blocked (<reason>)` · `partial (<what is missing>)`
 
@@ -58,7 +58,7 @@ to the rig's own values); the list of content nodes is byte-identical
 
 ## Blockers
 
-_None yet._
+None. Not verifiable here (no headset): everything under "Needs headset test".
 
 ## Needs headset test
 
@@ -82,3 +82,16 @@ _Append one line per item: feature — what to do on the Quest 3 — what to exp
 ## Push log
 
 _Date/time — branch — result (ok / auth failed / network)._
+
+Every push went through Git Credential Manager (`gh auth setup-git`) without
+a prompt; GitHub Actions ran both workflows on every push of the branch.
+
+- 2026-10-24 18:34 — claude/template-overhaul — ok (new branch, d68a07e)
+- 2026-10-24 18:37 — claude/template-overhaul — ok (f4222e9)
+- 2026-10-24 18:42 — claude/template-overhaul — ok (c000ee6)
+- 2026-10-24 18:54 — claude/template-overhaul — ok (ef2ebdc)
+- 2026-10-24 19:16 — claude/template-overhaul — ok (d585995)
+- 2026-10-24 19:23 — claude/template-overhaul — ok (350103b)
+- 2026-10-24 19:29 — claude/template-overhaul — ok (09ba5f7; first run with strict CI exports: Windows, Linux, Android Quest, WebXR all green, run 40111896037)
+- 2026-10-24 19:31 — claude/template-overhaul — ok (fec31f6; CI green, run 40112085963)
+- 2026-10-24 19:43 — claude/template-overhaul — ok (7903c1e)

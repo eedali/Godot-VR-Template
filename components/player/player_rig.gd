@@ -201,6 +201,10 @@ var _scene_values : Dictionary = {}
 # Controllers whose pointer currently points at a target (trigger guard)
 var _pointer_on_target : Dictionary = {}
 
+# Per controller while its guarded trigger is held: true if the pointer or
+# pickup owned the trigger when it was pressed (decided once per press)
+var _press_owner_busy : Dictionary = {}
+
 # True while the left trigger aims the teleport arc
 var _teleport_aiming : bool = false
 
@@ -372,9 +376,18 @@ func _node_rule(feature : StringName, path : String, active : bool) -> bool:
 			# Hip pockets ride on the player body
 			return not path.begins_with("PlayerBody") or config.is_enabled(&"player_body")
 		&"teleport", &"grapple":
-			# Each hand's trigger is shared with its pointer and pickup
-			return not _is_trigger_busy(_left_controller if left else _right_controller)
+			# Each hand's trigger is shared with its pointer and pickup. While
+			# the trigger is held the decision made at the press stands, so a
+			# laser leaving a panel mid-press cannot start a teleport/grapple.
+			return _is_trigger_free(_left_controller if left else _right_controller)
 	return true
+
+
+# True if a hand's trigger may drive its teleport/grapple right now
+func _is_trigger_free(controller : XRController3D) -> bool:
+	if _press_owner_busy.has(controller):
+		return not _press_owner_busy[controller]
+	return not _is_trigger_busy(controller)
 
 
 # True while a hand's trigger belongs to its pointer (on a target) or to the
@@ -397,7 +410,9 @@ func _on_node_turned_off(feature : StringName, node : Node) -> void:
 			if node is XRToolsFunctionPickup:
 				node.drop_object()
 		&"pockets":
-			# A disabled pocket refuses to hand its item back
+			# A disabled pocket refuses to hand its item back; also tell the
+			# persistence system not to refill it on zone load
+			node.set_meta(PersistentPocket.FEATURE_DISABLED_META, true)
 			if node is XRToolsSnapZone:
 				node.drop_object()
 		&"crouch":
@@ -421,6 +436,8 @@ func _on_node_turned_off(feature : StringName, node : Node) -> void:
 # Restore what _on_node_turned_off removed (idempotent)
 func _on_node_turned_on(feature : StringName, node : Node) -> void:
 	match feature:
+		&"pockets":
+			node.set_meta(PersistentPocket.FEATURE_DISABLED_META, false)
 		&"footsteps":
 			node.is_active = true
 			var on_jumped := Callable(node, &"_on_player_jumped")
@@ -523,12 +540,16 @@ func _update_hand_tracking(controller : XRController3D) -> void:
 				as XRToolsFunctionPickup
 		if pickup:
 			pickup.drop_object()
+		# XRNode3D re-applies show_when_tracked on every pose update, so it
+		# must be off while the hand is ignored
+		controller.show_when_tracked = false
 		controller.visible = false
 		controller.process_mode = Node.PROCESS_MODE_DISABLED
 	elif controller.process_mode == Node.PROCESS_MODE_DISABLED:
-		# Give visibility back to XRNode3D's show_when_tracked logic
+		# Give visibility back to XRNode3D (its setter re-evaluates tracking)
 		controller.process_mode = Node.PROCESS_MODE_INHERIT
-		controller.visible = controller.get_has_tracking_data() or not controller.show_when_tracked
+		controller.visible = true
+		controller.show_when_tracked = true
 
 
 # Interaction profile currently bound to a controller's tracker
@@ -598,9 +619,10 @@ func _connect_signals() -> void:
 		var on_change := _on_controller_tracking_changed.bind(controller).unbind(1)
 		controller.profile_changed.connect(on_change)
 		controller.tracking_changed.connect(on_change)
-	if _left_controller:
-		_left_controller.button_pressed.connect(_on_left_button.bind(true))
-		_left_controller.button_released.connect(_on_left_button.bind(false))
+	for controller : XRController3D in [_left_controller, _right_controller]:
+		if controller:
+			controller.button_pressed.connect(_on_trigger_button.bind(controller, true))
+			controller.button_released.connect(_on_trigger_button.bind(controller, false))
 	var body := get_node_or_null(^"PlayerBody") as XRToolsPlayerBody
 	if body:
 		body.player_teleported.connect(_on_player_teleported)
@@ -625,9 +647,11 @@ func _warn_missing_requirements() -> void:
 	if message == _last_requirement_warning:
 		return
 	_last_requirement_warning = message
-	if message != "":
-		push_warning("PlayerRig: these features are on but cannot work: %s. " % message
-				+ "Hip pockets and zone-switch areas also need the player body.")
+	if message == "":
+		return
+	if not config.is_enabled(&"player_body"):
+		message += ". Hip pockets and zone-switch areas also need the player body"
+	push_warning("PlayerRig: these features are on but cannot work: %s." % message)
 
 
 # Report missing feature nodes (scene edited without updating FEATURE_NODES)
@@ -703,18 +727,25 @@ func _on_pointing_event(event : XRToolsPointerEvent, controller : XRController3D
 			_update_trigger_guards()
 
 
-# Left-controller buttons: the teleport trigger pauses left-stick movement
-func _on_left_button(button_name : String, pressed : bool) -> void:
-	var teleport := get_feature_node(&"teleport")
-	if not teleport or button_name != teleport.teleport_button_action:
+# Guarded trigger pressed / released: decide once per press who owns it
+# (pointer/pickup or teleport/grapple); the left teleport trigger also pauses
+# left-stick movement while aiming
+func _on_trigger_button(button_name : String, controller : XRController3D, pressed : bool) -> void:
+	var guarded := get_feature_node(&"teleport" if controller == _left_controller else &"grapple")
+	if not guarded:
+		return
+	var action : String = guarded.teleport_button_action if controller == _left_controller \
+			else guarded.grapple_button_action
+	if button_name != action:
 		return
 	if pressed:
-		# Re-check the guard first (a held item may have been freed silently)
-		_update_trigger_guards()
-		_teleport_aiming = teleport.enabled
+		_press_owner_busy[controller] = _is_trigger_busy(controller)
 	else:
-		_teleport_aiming = false
-	_apply_feature(&"direct_movement", false)
+		_press_owner_busy.erase(controller)
+	_update_trigger_guards()
+	if controller == _left_controller:
+		_teleport_aiming = pressed and guarded.enabled
+		_apply_feature(&"direct_movement", false)
 
 
 # A teleport jumps the camera several metres in one frame; tell the vignette
@@ -727,4 +758,11 @@ func _on_player_teleported(_delta_transform : Transform3D) -> void:
 
 # A controller switched profile or gained/lost tracking
 func _on_controller_tracking_changed(controller : XRController3D) -> void:
+	# A release is never delivered for a controller that lost tracking
+	if not controller.get_has_tracking_data() and _press_owner_busy.has(controller):
+		_press_owner_busy.erase(controller)
+		if controller == _left_controller:
+			_teleport_aiming = false
+			_apply_feature(&"direct_movement", false)
+		_update_trigger_guards()
 	_update_hand_tracking(controller)

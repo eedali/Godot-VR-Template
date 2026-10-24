@@ -156,7 +156,7 @@ matrix) and write the `custom` components:
       area, wind area, climbable wall).
 - [x] 4.10 Extend `FEATURE_NODES` + smoke-test assertions for every new node.
       Check green. Commit (one commit per sub-area is fine), push.
-- [ ] 4.11 `godot-reviewer` pass on the diff; fix `high` findings.
+- [x] 4.11 `godot-reviewer` pass on the diff; fix `high` findings.
 
 **Acceptance:** every row in `FEATURES.md` with a toggle has a node/handler in
 the rig; the smoke test asserts every path; the headless run is clean.
@@ -229,10 +229,10 @@ only the docs.
 
 ## Phase 8 — Final verification, push, report (`chore:`)
 
-- [ ] 8.1 `bash tools/check.sh --run --export` green from a clean import
+- [x] 8.1 `bash tools/check.sh --run --export` green from a clean import
       (delete `.godot/imported` is **not** allowed; just run the import again).
-- [ ] 8.2 `godot-reviewer` on `git diff main...HEAD`; fix `high` findings.
-- [ ] 8.3 `PROGRESS.md` final table; `DECISIONS.md` complete.
+- [x] 8.2 `godot-reviewer` on `git diff main...HEAD`; fix `high` findings.
+- [x] 8.3 `PROGRESS.md` final table; `DECISIONS.md` complete.
 - [ ] 8.4 `git push -u origin claude/template-overhaul`. If a PR can be opened
       with `gh pr create --fill --base main` (gh logged in), do it and record the
       URL; otherwise record the compare URL
