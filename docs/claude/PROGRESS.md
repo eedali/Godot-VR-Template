@@ -65,7 +65,7 @@ _None yet._
 _Append one line per item: feature — what to do on the Quest 3 — what to expect._
 
 - hand tracking — put the controllers down, raise both hands — hands follow, pinch clicks UI / starts the left teleport, grasp picks up; with `hand_tracking = false` the hands disappear instead
-- passthrough — set `passthrough = true` (or toggle at runtime) — camera feed replaces the sky, zone geometry stays; `false` restores the sky
+- passthrough — set `passthrough = true` (or press the showcase kiosk button) — camera feed replaces the sky, zone geometry stays; `false` restores the sky (needs `xr/openxr/extensions/meta/passthrough`, now on)
 - teleport — hold the left trigger away from UI — arc visible in gl_compatibility, release teleports; trigger on a UI panel clicks without teleporting
 - vignette — smooth-turn and walk — tunnel fades in while moving, out when still; `vignette_auto_adjust = false` gives a permanent 0.8 tunnel
 - collision hands (now layer 18) — push the hands into a wall/table, reach for hip/back pockets — hands stop at surfaces, the body no longer bumps into its own hands
@@ -75,6 +75,9 @@ _Append one line per item: feature — what to do on the Quest 3 — what to exp
 - refresh rate — `target_refresh_rate` 72 / 90 / 120 — headset switches rate (log: "StartXR: Setting refresh rate to ...")
 - haptics — pick up / drop an item, press a UI button — short tick on that controller; `haptics = false` silences it
 - debug HUD — `debug_hud = true` in a debug build — panel below the view shows FPS/frame time; absent in a release export
+- joystick prefab — grab the showcase joystick — tilts on both axes, springs back on release
+- gaze pointer — `gaze_pointer = true`, look at the UI-station button for 1.5 s — it clicks
+- teleport + stick — hold the left trigger and push the left stick — the landing marker turns, the player does not move
 
 ## Push log
 

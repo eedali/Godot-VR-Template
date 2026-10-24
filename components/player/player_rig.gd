@@ -21,11 +21,14 @@ extends XROrigin3D
 ## [code]VRFeatures.set_enabled()[/code] / [code]set_value()[/code].
 ##
 ## Rules between features:
-## [br]- movement features need the player body; with [code]player_body[/code]
-##   off they are forced off (a warning lists them), and so are the hip pockets.
+## [br]- [constant REQUIRES]: movement features need the player body, climb
+##   and world grab also need pickup; a feature whose requirement is off is
+##   forced off and one warning lists it. Hip pockets need the body too.
 ## [br]- with [code]flight[/code] on, the left-hand crouch is off (both use B/Y).
-## [br]- the left-hand teleport pauses while the left pointer is on a target
-##   or the left hand holds something (all three use the left trigger).
+## [br]- the trigger of each hand is shared: the left teleport and the right
+##   grapple pause while that hand's pointer is on a target or the hand holds
+##   something, and while the left teleport is aiming the left stick turns the
+##   landing direction instead of moving the player.
 
 
 ## Emitted after the whole configuration has been applied
@@ -137,22 +140,34 @@ const EXTERNAL_FEATURES : Dictionary = {
 	&"remove_disabled_nodes": "PlayerRig startup (_enter_tree)",
 }
 
-## Movement features driven by the player body (forced off without it).
-## Keep in sync with DEPENDENTS[&"player_body"].
-const BODY_FEATURES : Array[StringName] = [
-	&"direct_movement", &"turn", &"jump", &"physical_jump", &"crouch", &"sprint",
-	&"jog", &"climb", &"flight", &"glide", &"grapple", &"wall_walk", &"world_grab",
-	&"wind", &"footsteps",
-]
+## Features that only work while other features are on. The player body
+## drives every movement provider and the teleport; climb and world grab grab
+## through the pickup functions.
+const REQUIRES : Dictionary = {
+	&"direct_movement": [&"player_body"],
+	&"turn": [&"player_body"],
+	&"teleport": [&"player_body"],
+	&"jump": [&"player_body"],
+	&"physical_jump": [&"player_body"],
+	&"crouch": [&"player_body"],
+	&"sprint": [&"player_body"],
+	&"jog": [&"player_body"],
+	&"climb": [&"player_body", &"pickup"],
+	&"flight": [&"player_body"],
+	&"glide": [&"player_body"],
+	&"grapple": [&"player_body"],
+	&"wall_walk": [&"player_body"],
+	&"world_grab": [&"player_body", &"pickup"],
+	&"wind": [&"player_body"],
+	&"footsteps": [&"player_body"],
+}
 
-## Features whose state depends on another feature
-const DEPENDENTS : Dictionary = {
-	&"player_body": [
-		&"direct_movement", &"turn", &"jump", &"physical_jump", &"crouch", &"sprint",
-		&"jog", &"climb", &"flight", &"glide", &"grapple", &"wall_walk", &"world_grab",
-		&"wind", &"footsteps", &"pockets",
-	],
+## Node-level rules: features whose nodes also depend on another feature
+const NODE_RULE_SOURCES : Dictionary = {
 	&"flight": [&"crouch"],
+	&"player_body": [&"pockets"],
+	&"pointer": [&"teleport", &"grapple"],
+	&"pickup": [&"teleport", &"grapple"],
 }
 
 ## Features whose nodes are never freed by remove_disabled_nodes, because
@@ -183,9 +198,11 @@ var config : VRFeatureConfig
 # so switching a setting back restores what the scene designer chose.
 var _scene_values : Dictionary = {}
 
-# Teleport guard state (left trigger is shared with pointer and pickup)
-var _left_pointer_on_target : bool = false
-var _left_hand_holding : bool = false
+# Controllers whose pointer currently points at a target (trigger guard)
+var _pointer_on_target : Dictionary = {}
+
+# True while the left trigger aims the teleport arc
+var _teleport_aiming : bool = false
 
 # Instanced desktop fallback (null while not needed)
 var _desktop_fallback : Node
@@ -193,11 +210,12 @@ var _desktop_fallback : Node
 # True once the startup removal of disabled nodes has run
 var _removed_disabled : bool = false
 
-# True once the "player_body is off" warning was printed
-var _warned_no_body : bool = false
+# Last "requirement missing" warning, to print each one only once
+var _last_requirement_warning : String = ""
 
-# Left controller (shares its trigger between teleport, pointer and pickup)
+# Controllers (their triggers are shared between functions)
 @onready var _left_controller : XRController3D = get_node_or_null(^"LeftHand")
+@onready var _right_controller : XRController3D = get_node_or_null(^"RightHand")
 
 
 # Add support for is_xr_class on XRTools classes
@@ -222,7 +240,7 @@ func _ready() -> void:
 		return
 
 	_validate_paths()
-	_connect_hand_signals()
+	_connect_signals()
 
 	var features := _get_features()
 	if features:
@@ -253,6 +271,18 @@ static func get_all_feature_paths() -> Array[String]:
 	return paths
 
 
+## Returns the features whose state depends on [param feature]
+static func get_dependents(feature : StringName) -> Array[StringName]:
+	var dependents : Array[StringName] = []
+	for dependent : StringName in REQUIRES:
+		if REQUIRES[dependent].has(feature):
+			dependents.append(dependent)
+	for dependent : StringName in NODE_RULE_SOURCES.get(feature, []):
+		if not dependents.has(dependent):
+			dependents.append(dependent)
+	return dependents
+
+
 ## Returns the feature node paths that do not exist below this rig
 func get_missing_paths() -> Array[String]:
 	var missing : Array[String] = []
@@ -280,12 +310,13 @@ func get_feature_nodes(feature : StringName) -> Array[Node]:
 
 
 ## Returns true if [param feature] is effectively active on this rig (the
-## configuration value combined with the rules between features)
+## configuration value combined with [constant REQUIRES])
 func is_feature_active(feature : StringName) -> bool:
 	if not config.is_enabled(feature):
 		return false
-	if BODY_FEATURES.has(feature) and not config.is_enabled(&"player_body"):
-		return false
+	for required : StringName in REQUIRES.get(feature, []):
+		if not config.is_enabled(required):
+			return false
 	return true
 
 
@@ -302,11 +333,11 @@ func _apply_all(p_startup : bool = false) -> void:
 		# Log boolean settings that are off; enum/int settings stay quiet
 		var value : Variant = config.get(feature)
 		_apply_setting(feature, value, value is bool and not value)
-	_warn_if_no_body()
+	_warn_missing_requirements()
 	features_applied.emit()
 
 
-# Switch the nodes of one feature to its effective state
+# Switch the nodes of one feature to their effective state
 func _apply_feature(feature : StringName, log_it : bool = true) -> void:
 	var active := is_feature_active(feature)
 	var paths : Array = FEATURE_NODES[feature]
@@ -316,7 +347,10 @@ func _apply_feature(feature : StringName, log_it : bool = true) -> void:
 			continue
 		var node_active := _node_rule(feature, path, active)
 		_set_node_active(node, node_active)
-		if not node_active:
+		# The clean-up handlers are idempotent, so they run on every apply
+		if node_active:
+			_on_node_turned_on(feature, node)
+		else:
 			_on_node_turned_off(feature, node)
 		if log_it:
 			_log(feature, "on" if node_active else "off", node)
@@ -324,26 +358,47 @@ func _apply_feature(feature : StringName, log_it : bool = true) -> void:
 
 # Per-node rules between features
 func _node_rule(feature : StringName, path : String, active : bool) -> bool:
+	if not active:
+		return false
+	var left := path.begins_with("LeftHand")
 	match feature:
+		&"direct_movement":
+			# While the teleport aims, the left stick turns its landing direction
+			return not (left and _teleport_aiming)
 		&"crouch":
 			# Flight uses B/Y on the left controller
-			if path.begins_with("LeftHand") and is_feature_active(&"flight"):
-				return false
+			return not (left and is_feature_active(&"flight"))
 		&"pockets":
 			# Hip pockets ride on the player body
-			if path.begins_with("PlayerBody") and not config.is_enabled(&"player_body"):
-				return false
-		&"teleport":
-			return active and not _left_pointer_on_target and not _left_hand_holding
-	return active
+			return not path.begins_with("PlayerBody") or config.is_enabled(&"player_body")
+		&"teleport", &"grapple":
+			# Each hand's trigger is shared with its pointer and pickup
+			return not _is_trigger_busy(_left_controller if left else _right_controller)
+	return true
 
 
-# Clean up state a node leaves behind when it is switched off at runtime
+# True while a hand's trigger belongs to its pointer (on a target) or to the
+# object it holds
+func _is_trigger_busy(controller : XRController3D) -> bool:
+	if not controller:
+		return false
+	if _pointer_on_target.get(controller, false):
+		return true
+	var pickup := XRTools.find_xr_child(controller, "*", "XRToolsFunctionPickup") \
+			as XRToolsFunctionPickup
+	return pickup != null and is_instance_valid(pickup.picked_up_object)
+
+
+# Clean up state a node leaves behind when it is switched off (idempotent)
 func _on_node_turned_off(feature : StringName, node : Node) -> void:
 	match feature:
 		&"pickup":
 			# A disabled pickup never processes the grip release
 			if node is XRToolsFunctionPickup:
+				node.drop_object()
+		&"pockets":
+			# A disabled pocket refuses to hand its item back
+			if node is XRToolsSnapZone:
 				node.drop_object()
 		&"crouch":
 			# A disabled crouch provider never clears its height override
@@ -351,7 +406,27 @@ func _on_node_turned_off(feature : StringName, node : Node) -> void:
 			if body:
 				body.override_player_height(node)
 		&"pointer":
-			_left_pointer_on_target = false
+			_pointer_on_target.erase(XRHelpers.get_xr_controller(node))
+		&"footsteps":
+			# The footstep provider marks itself always-active and listens to
+			# jumps directly, so 'enabled' alone does not silence it.
+			# (Deliberate use of the upstream private handler.)
+			node.is_active = false
+			var on_jumped := Callable(node, &"_on_player_jumped")
+			var body := XRToolsPlayerBody.find_instance(self)
+			if body and body.player_jumped.is_connected(on_jumped):
+				body.player_jumped.disconnect(on_jumped)
+
+
+# Restore what _on_node_turned_off removed (idempotent)
+func _on_node_turned_on(feature : StringName, node : Node) -> void:
+	match feature:
+		&"footsteps":
+			node.is_active = true
+			var on_jumped := Callable(node, &"_on_player_jumped")
+			var body := XRToolsPlayerBody.find_instance(self)
+			if body and not body.player_jumped.is_connected(on_jumped):
+				body.player_jumped.connect(on_jumped)
 
 
 # Apply a property-style setting
@@ -435,13 +510,19 @@ func _set_scene_value(node : Node, property : StringName, on : bool, off_value :
 
 
 # A controller driven by optical hand tracking is ignored (hidden, not
-# processing) while hand_tracking is off; controllers are never affected.
+# processing, holding nothing) while hand_tracking is off; controllers are
+# never affected. Re-run on every profile and tracking change, because
+# XRNode3D re-applies show_when_tracked when tracking comes back.
 func _update_hand_tracking(controller : XRController3D) -> void:
 	if not controller:
 		return
 	var from_hands := _get_controller_profile(controller) == HAND_INTERACTION_PROFILE
 	var ignore := from_hands and not config.is_enabled(&"hand_tracking")
 	if ignore:
+		var pickup := XRTools.find_xr_child(controller, "*", "XRToolsFunctionPickup") \
+				as XRToolsFunctionPickup
+		if pickup:
+			pickup.drop_object()
 		controller.visible = false
 		controller.process_mode = Node.PROCESS_MODE_DISABLED
 	elif controller.process_mode == Node.PROCESS_MODE_DISABLED:
@@ -504,8 +585,9 @@ func _remove_disabled_nodes() -> void:
 				node.free()
 
 
-# Connect the hand signals used by haptics and the teleport guard
-func _connect_hand_signals() -> void:
+# Connect the signals used by haptics, the trigger guards, the teleport
+# aiming rule, the vignette and hand tracking
+func _connect_signals() -> void:
 	for pickup in get_feature_nodes(&"pickup"):
 		var controller := XRHelpers.get_xr_controller(pickup)
 		pickup.has_picked_up.connect(_on_pickup_picked_up.bind(controller))
@@ -513,7 +595,15 @@ func _connect_hand_signals() -> void:
 	for pointer in get_feature_nodes(&"pointer"):
 		pointer.pointing_event.connect(_on_pointing_event.bind(XRHelpers.get_xr_controller(pointer)))
 	for controller in get_feature_nodes(&"hand_tracking"):
-		controller.profile_changed.connect(_on_controller_profile_changed.bind(controller))
+		var on_change := _on_controller_tracking_changed.bind(controller).unbind(1)
+		controller.profile_changed.connect(on_change)
+		controller.tracking_changed.connect(on_change)
+	if _left_controller:
+		_left_controller.button_pressed.connect(_on_left_button.bind(true))
+		_left_controller.button_released.connect(_on_left_button.bind(false))
+	var body := get_node_or_null(^"PlayerBody") as XRToolsPlayerBody
+	if body:
+		body.player_teleported.connect(_on_player_teleported)
 
 
 # Print a feature change in debug builds
@@ -522,19 +612,22 @@ func _log(feature : StringName, state : String, node : Node) -> void:
 		print("VRFeatures: %s -> %s (%s)" % [feature, state, node.name])
 
 
-# Warn once when movement features are on but the player body is off
-func _warn_if_no_body() -> void:
-	if config.is_enabled(&"player_body") or _warned_no_body:
+# Warn once per combination when switched-on features lack a requirement
+func _warn_missing_requirements() -> void:
+	var missing : PackedStringArray = []
+	for feature : StringName in REQUIRES:
+		if not config.is_enabled(feature):
+			continue
+		for required : StringName in REQUIRES[feature]:
+			if not config.is_enabled(required):
+				missing.append("%s (needs %s)" % [feature, required])
+	var message := ", ".join(missing)
+	if message == _last_requirement_warning:
 		return
-	var forced : Array[StringName] = []
-	for feature in BODY_FEATURES:
-		if config.is_enabled(feature):
-			forced.append(feature)
-	if forced.is_empty():
-		return
-	_warned_no_body = true
-	push_warning("PlayerRig: player_body is off, so these movement features are off too: %s. "
-			% ", ".join(forced) + "Hip pockets and zone-switch areas also need the player body.")
+	_last_requirement_warning = message
+	if message != "":
+		push_warning("PlayerRig: these features are on but cannot work: %s. " % message
+				+ "Hip pockets and zone-switch areas also need the player body.")
 
 
 # Report missing feature nodes (scene edited without updating FEATURE_NODES)
@@ -560,6 +653,12 @@ func _get_features() -> Node:
 	return get_node_or_null(^"/root/VRFeatures")
 
 
+# Re-apply the trigger-guarded features of both hands
+func _update_trigger_guards() -> void:
+	_apply_feature(&"teleport", false)
+	_apply_feature(&"grapple", false)
+
+
 # Handle runtime changes of a single feature
 func _on_feature_value_changed(feature : StringName, value : Variant) -> void:
 	if FEATURE_NODES.has(feature):
@@ -571,47 +670,61 @@ func _on_feature_value_changed(feature : StringName, value : Variant) -> void:
 		_apply_setting(feature, value)
 
 	# Re-apply features that depend on this one
-	for dependent : StringName in DEPENDENTS.get(feature, []):
+	for dependent in get_dependents(feature):
 		_apply_feature(dependent, false)
-	if feature == &"player_body":
-		_warned_no_body = false
-		_warn_if_no_body()
+	_warn_missing_requirements()
 
 
 # Handle the whole configuration being replaced
 func _on_config_replaced(p_config : VRFeatureConfig) -> void:
 	config = p_config
-	_warned_no_body = false
 	_apply_all(false)
 
 
 # Haptic tick when a hand picks something up
 func _on_pickup_picked_up(_what : Variant, controller : XRController3D) -> void:
-	if controller == _left_controller:
-		_left_hand_holding = true
-		_apply_feature(&"teleport", false)
+	_update_trigger_guards()
 	Haptics.tap(controller)
 
 
 # Softer tick when a hand lets go
 func _on_pickup_dropped(controller : XRController3D) -> void:
-	if controller == _left_controller:
-		_left_hand_holding = false
-		_apply_feature(&"teleport", false)
+	_update_trigger_guards()
 	Haptics.pulse(controller, 0.25, 20, &"haptics_drop")
 
 
-# Pointer events: haptic tick on press, teleport guard on enter/exit
+# Pointer events: haptic tick on press, trigger guard on enter/exit
 func _on_pointing_event(event : XRToolsPointerEvent, controller : XRController3D) -> void:
 	match event.event_type:
 		XRToolsPointerEvent.Type.PRESSED:
 			Haptics.tap(controller)
 		XRToolsPointerEvent.Type.ENTERED, XRToolsPointerEvent.Type.EXITED:
-			if controller == _left_controller:
-				_left_pointer_on_target = event.event_type == XRToolsPointerEvent.Type.ENTERED
-				_apply_feature(&"teleport", false)
+			_pointer_on_target[controller] = event.event_type == XRToolsPointerEvent.Type.ENTERED
+			_update_trigger_guards()
 
 
-# A controller switched between a controller profile and hand tracking
-func _on_controller_profile_changed(_role : String, controller : XRController3D) -> void:
+# Left-controller buttons: the teleport trigger pauses left-stick movement
+func _on_left_button(button_name : String, pressed : bool) -> void:
+	var teleport := get_feature_node(&"teleport")
+	if not teleport or button_name != teleport.teleport_button_action:
+		return
+	if pressed:
+		# Re-check the guard first (a held item may have been freed silently)
+		_update_trigger_guards()
+		_teleport_aiming = teleport.enabled
+	else:
+		_teleport_aiming = false
+	_apply_feature(&"direct_movement", false)
+
+
+# A teleport jumps the camera several metres in one frame; tell the vignette
+# not to read that as speed
+func _on_player_teleported(_delta_transform : Transform3D) -> void:
+	var vignette := get_feature_node(&"vignette")
+	if vignette:
+		vignette.auto_first = true
+
+
+# A controller switched profile or gained/lost tracking
+func _on_controller_tracking_changed(controller : XRController3D) -> void:
 	_update_hand_tracking(controller)

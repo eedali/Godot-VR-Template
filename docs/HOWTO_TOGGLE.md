@@ -140,11 +140,19 @@ use the helpers in `components/system/`:
 - **`FeatureStatusLabel`** (a `Label3D`): shows the live on/off state of a list
   of features.
 
-Rules the rig applies on top of the raw values (see `PlayerRig` docs):
-movement features are forced off while `player_body` is off (one warning is
-logged), the left-hand crouch is off while `flight` is on, and the left-hand
-teleport pauses while the left pointer is on a target or the left hand holds
-something. `PlayerRig.is_feature_active(name)` returns the effective state.
+Rules the rig applies on top of the raw values (`PlayerRig.REQUIRES` and
+`_node_rule`):
+
+- movement features and teleport need `player_body`; `climb` and
+  `world_grab` also need `pickup`. A feature whose requirement is off is
+  forced off and one warning names it. Hip pockets need the body too.
+- `flight` on → left-hand crouch off (both use B/Y).
+- Each trigger is shared: the left teleport and the right grapple pause while
+  that hand's pointer is on a target or the hand holds something.
+- While the left trigger aims the teleport, the left stick turns the landing
+  direction instead of moving the player.
+
+`PlayerRig.is_feature_active(name)` returns the effective state.
 
 ## 5. Adding a new toggle
 

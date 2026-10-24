@@ -29,7 +29,10 @@ height = 0.16
 mesh = SubResource("Mesh_base")
 surface_material_override/0 = ExtResource("2_r")
 
-[node name="InteractableJoystick" type="Node3D" parent="."]
+[node name="Pivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+
+[node name="InteractableJoystick" type="Node3D" parent="Pivot"]
 script = ExtResource("1_r")
 joystick_x_limit_min = -30.0
 joystick_x_limit_max = 30.0
@@ -37,19 +40,19 @@ joystick_y_limit_min = -30.0
 joystick_y_limit_max = 30.0
 default_on_release = true
 
-[node name="Stick" type="MeshInstance3D" parent="InteractableJoystick"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
+[node name="Stick" type="MeshInstance3D" parent="Pivot/InteractableJoystick"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -0.08)
 mesh = SubResource("Mesh_arm")
 
-[node name="HandleOrigin" type="Node3D" parent="InteractableJoystick"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 0)
+[node name="HandleOrigin" type="Node3D" parent="Pivot/InteractableJoystick"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.16)
 
-[node name="InteractableHandle" parent="InteractableJoystick/HandleOrigin" instance=ExtResource("3_r")]
+[node name="InteractableHandle" parent="Pivot/InteractableJoystick/HandleOrigin" instance=ExtResource("3_r")]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableJoystick/HandleOrigin/InteractableHandle"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pivot/InteractableJoystick/HandleOrigin/InteractableHandle"]
 shape = SubResource("Shape_knob")
 
-[node name="Knob" type="MeshInstance3D" parent="InteractableJoystick/HandleOrigin"]
+[node name="Knob" type="MeshInstance3D" parent="Pivot/InteractableJoystick/HandleOrigin"]
 mesh = SubResource("Mesh_knob")
 
 [node name="Title" type="Label3D" parent="."]

@@ -125,6 +125,8 @@ snap_require = "backpack"
 
 [node name="FunctionGazePointer" parent="XRCamera3D" instance=ExtResource("21_gaze")]
 enabled = false
+click_on_hold = true
+hold_time = 1.5
 
 [node name="DebugHUD" parent="XRCamera3D" instance=ExtResource("34_dhud")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, -0.6)

@@ -72,6 +72,7 @@ func _run() -> void:
 		return
 	_check_zone(game_state)
 	await _check_runtime_toggle(game_state)
+	_check_trigger_rules(game_state)
 
 	# Every other zone in the database
 	for zone : Resource in game_state.zone_database.zones:
@@ -191,6 +192,34 @@ func _check_runtime_toggle(game_state : Node) -> void:
 		if node.enabled != rig.is_feature_active(feature) or node.enabled != value:
 			_fail("runtime toggle of %s to %s did not reach the rig" % [feature, value])
 	print("zone_load_test: runtime toggle ok (%s)" % feature)
+
+
+# Aiming the teleport (left trigger) pauses left-stick movement, and a
+# teleport tells the vignette to skip the jump
+func _check_trigger_rules(game_state : Node) -> void:
+	var rig : Node = game_state.current_zone.get_node("XROrigin3D")
+	var teleport : Node = rig.get_feature_node(&"teleport")
+	var direct : Node = rig.get_node_or_null("LeftHand/CollisionHandLeft/MovementDirect")
+	if not teleport or not direct or not teleport.enabled or not direct.enabled:
+		print("zone_load_test: trigger rules skipped (teleport or direct movement off)")
+		return
+
+	var left : Node = rig.get_node("LeftHand")
+	left.button_pressed.emit(teleport.teleport_button_action)
+	if direct.enabled:
+		_fail("left stick movement still on while the teleport aims")
+	left.button_released.emit(teleport.teleport_button_action)
+	if not direct.enabled:
+		_fail("left stick movement not restored after teleport aiming")
+
+	var vignette : Node = rig.get_feature_node(&"vignette")
+	if vignette:
+		vignette.auto_first = false
+		var body : Node = rig.get_node("PlayerBody")
+		body.teleport(body.global_transform)
+		if not vignette.auto_first:
+			_fail("vignette not reset after a teleport")
+	print("zone_load_test: trigger rules ok")
 
 
 # Apply "--set=name=value,..." / "--set=all_on" from the user command line

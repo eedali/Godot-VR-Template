@@ -5,7 +5,8 @@ extends Node3D
 ## Debug HUD
 ##
 ## A small head-locked panel (child of the [XRCamera3D]) showing FPS, frame
-## time, draw calls and battery, for Quest frame-budget work. The panel
+## time, script/physics time, draw calls and memory, for Quest frame-budget
+## work. The panel
 ## refreshes at 4 Hz through a throttled [XRToolsViewport2DIn3D], so it costs
 ## almost nothing while visible and nothing while disabled.
 ##

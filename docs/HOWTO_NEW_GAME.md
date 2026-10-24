@@ -32,7 +32,9 @@ Typical presets:
 | Mixed reality (Quest) | `passthrough` | `vignette` |
 
 Set `remove_disabled_nodes = true` once the feature set is final (disabled
-nodes are then freed at startup instead of idling in the tree).
+nodes are then freed at startup instead of idling in the tree). Recommended
+for Quest builds: a few disabled XR Tools nodes (grapple and gaze ray casts,
+the wind sensor area) keep doing a little work every physics tick.
 
 ## 3. Make it yours (identity)
 

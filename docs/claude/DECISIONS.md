@@ -282,3 +282,30 @@ says; `directional_shadow/size.mobile=2048` (written explicitly, equals the
 engine default) and `positional_shadow/atlas_size.mobile=1024` (engine default
 2048) to save Quest memory. Knobs documented in docs/HOWTO_NEW_GAME.md §6.
 Reversible: yes.
+
+### D-26 — Second review (Phase 4 diff) fixes   (phase 8, 2026-10-24)
+Context: the second `godot-reviewer` pass returned VERDICT PASS (no high) with
+six medium findings; two affect the default configuration.
+Decision (all fixed):
+- Left stick vs. teleport: while the left trigger aims the teleport
+  (controller `button_pressed`/`button_released`, no polling) the left
+  MovementDirect pauses, so the stick only turns the landing direction.
+- Vignette after a teleport: `PlayerBody.player_teleported` sets the
+  vignette's `auto_first`, so a teleport is not read as speed.
+- Gaze pointer: `click_on_hold = true`, `hold_time = 1.5` (it cannot click
+  otherwise).
+- Joystick prefab: a `Pivot` rotated +90 degrees about X; the stick lies along
+  the joystick's local -Z so both axes work.
+- Meta passthrough: `xr/openxr/extensions/meta/passthrough=true` (vendors
+  4.3 only enables XR_FB_passthrough through this setting).
+- Pockets off drops pocketed items; saved items are not snapped into a
+  disabled pocket (they stay in the zone at the pocket).
+- Lows also fixed: hand tracking re-hides on `tracking_changed` and drops held
+  objects; the right grapple has the same trigger guard as the left teleport;
+  the guard reads `picked_up_object` instead of latching; `REQUIRES` table
+  (teleport needs the body, climb/world grab need pickup) with one warning;
+  footsteps off clears `is_active` and the jump-sound connection; debug HUD
+  shows real frame time (1000/FPS) and labels script time "process".
+- Not changed: small per-tick cost of a few disabled XR Tools nodes (ray casts,
+  wind area) — documented; `remove_disabled_nodes = true` recommended for Quest.
+Reversible: yes.

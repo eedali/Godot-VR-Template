@@ -138,9 +138,11 @@ func _populate_pocket() -> void:
 	if not item:
 		return
 
-	# Put the item in the pocket
+	# Put the item in the pocket. A disabled pocket (pockets feature off)
+	# could never hand it back, so leave it in the zone at the pocket instead.
 	item.global_transform = global_transform
-	pick_up_object.call_deferred(item)
+	if enabled:
+		pick_up_object.call_deferred(item)
 
 
 # Called when the parent pickable body is picked up

@@ -86,5 +86,6 @@ openxr/extensions/hand_tracking=true
 openxr/extensions/hand_tracking_unobstructed_data_source=true
 openxr/extensions/hand_tracking_controller_data_source=true
 openxr/extensions/hand_interaction_profile=true
+openxr/extensions/meta/passthrough=true
 shaders/enabled=true
 openxr/extensions/meta/color_space/starting_color_space=3

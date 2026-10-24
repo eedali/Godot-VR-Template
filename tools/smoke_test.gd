@@ -220,8 +220,10 @@ func _check_player_rig() -> void:
 				or rig.EXTERNAL_FEATURES.has(feature)
 		if not handled:
 			_failures.append(PLAYER_RIG_SCENE + " (feature not handled anywhere: %s)" % feature)
-	for feature : StringName in rig.BODY_FEATURES:
-		if not rig.DEPENDENTS[&"player_body"].has(feature):
-			_failures.append(PLAYER_RIG_SCENE + " (DEPENDENTS[player_body] misses %s)" % feature)
+	for table : Dictionary in [rig.REQUIRES, rig.NODE_RULE_SOURCES]:
+		for feature : StringName in table:
+			for other : StringName in [feature] + Array(table[feature]):
+				if not config.has_feature(other):
+					_failures.append(PLAYER_RIG_SCENE + " (unknown feature in rules: %s)" % other)
 	print("smoke_test: PlayerRig has %d feature node paths" % paths.size())
 	rig.free()

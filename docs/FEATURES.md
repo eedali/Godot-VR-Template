@@ -25,18 +25,18 @@ its toggles.
 | Strafe | `strafe` | on | Sideways movement on the left stick | headless |
 | Turning | `turn` | on | Right stick turns | headless |
 | Turn mode | `turn_mode` | Default | `DEFAULT` follows the user setting (Options → snap turning), `SNAP`, `SMOOTH` | headless |
-| Teleport | `teleport` | on | Left trigger: arc teleport (pauses while the left pointer is on UI or the hand holds something) | needs headset |
+| Teleport | `teleport` | on | Left trigger: arc teleport; the left stick turns the landing direction while aiming; pauses while the left pointer is on UI or the hand holds something | needs headset |
 | Jump | `jump` | on | A / X | headless |
 | Physical jump | `physical_jump` | off | Jump by jumping (or swinging the arms) | needs headset |
 | Crouch | `crouch` | on | Hold B / Y | headless |
 | Sprint | `sprint` | on | Click the left stick | headless |
 | Jog in place | `jog` | off | Swing the arms to walk / run | needs headset |
-| Climb | `climb` | off | Grab `climbable_wall` / any `XRToolsClimbable` | needs headset |
+| Climb | `climb` | off | Grab `climbable_wall` / any `XRToolsClimbable` (needs `pickup`) | needs headset |
 | Flight | `flight` | off | Left B / Y toggles flying (left crouch is off while flight is on) | needs headset |
 | Glide | `glide` | off | Spread the arms while falling | needs headset |
-| Grapple | `grapple` | off | Right trigger at a target on physics layer 5 (`grapple_target`) | needs headset |
+| Grapple | `grapple` | off | Right trigger at a target on physics layer 5 (`grapple_target`); pauses while the right pointer is on UI or the hand holds something | needs headset |
 | Wall walk | `wall_walk` | off | Walk on surfaces on physics layer 4 (`wall_walk_surface`) | needs headset |
-| World grab | `world_grab` | off | Grab inside a `world_grab_area` to pull yourself | needs headset |
+| World grab | `world_grab` | off | Grab inside a `world_grab_area` to pull yourself (needs `pickup`) | needs headset |
 | Wind | `wind` | off | `wind_area`s push the player | needs headset |
 | Footsteps | `footsteps` | off | Step sounds from `XRToolsSurfaceAudio` in the zone | needs headset |
 
@@ -52,7 +52,7 @@ with a `Destination` marker), `climbable_wall`, `grapple_target`,
 | Vignette auto-adjust | `vignette_auto_adjust` | on | Strength follows speed; off = permanent tunnel (`PlayerRig.static_vignette_radius`) | needs headset |
 | Head in wall | `head_behavior` | Fade | Push away / Fade / Disabled | needs headset |
 | Height calibration | `height_calibration` | on | Calibrate the player height from the headset at start | needs headset |
-| Player body | `player_body` | on | Physical body. Off = seated game: movement features, hip pockets and zone-switch areas need the body and stop working | headless |
+| Player body | `player_body` | on | Physical body. Off = seated game: movement features, teleport, hip pockets and zone-switch areas need the body and stop working | headless |
 | Loading prompt | `loading_prompt` | off | "Hold to continue" on every scene load (off: only the first) | headless |
 
 The user's own comfort options (snap turning, dead zones, haptics scale,
@@ -68,7 +68,7 @@ player height) are in the start menu → **Options** (XR Tools user settings UI)
 | Ranged pickup | `ranged_pickup` | on | Pick up from a distance | needs headset |
 | Pointer | `pointer` | on | Laser pointer for UI and pointable objects (both hands) | headless |
 | Laser visible | `laser_visible` | on | Show the laser (off = invisible pointer) | headless |
-| Gaze pointer | `gaze_pointer` | off | Head pointer | needs headset |
+| Gaze pointer | `gaze_pointer` | off | Head pointer; look at a target for 1.5 s to click | needs headset |
 | Poke | `poke` | on | Press buttons / UI with the index finger tip | needs headset |
 | Pockets | `pockets` | on | Two hip pockets and a back pocket (backpack) | needs headset |
 | Wrist menu | `wrist_ui` | on | Save / Quit / Showcase on the left wrist | headless |
@@ -86,7 +86,7 @@ Interactable prefabs in `components/interactables/`: `push_button`, `lever`
 | Feature | Toggle | Default | What it does | Verified |
 |---|---|---|---|---|
 | Hand tracking | `hand_tracking` | on | Controller-free hands (pinch = trigger, grasp = grip); off hides hands driven by optical tracking | needs headset |
-| Passthrough | `passthrough` | off | Mixed reality on Quest; can be switched at runtime (showcase kiosk button) | needs headset |
+| Passthrough | `passthrough` | off | Mixed reality on Quest (project setting `xr/openxr/extensions/meta/passthrough` is on so the runtime offers alpha blend); can be switched at runtime (showcase kiosk button) | needs headset |
 | Desktop fallback | `desktop_fallback` | on | WASD / arrows, mouse look, Space, C / Ctrl, Shift, left click when no headset is found | headless |
 | Debug HUD | `debug_hud` | off | FPS / frame time / draw calls / memory panel (debug builds only) | needs headset |
 | Refresh rate | `target_refresh_rate` | 0 | Display Hz (0 = runtime default; Quest 3: 72 / 90 / 120) | needs headset |
