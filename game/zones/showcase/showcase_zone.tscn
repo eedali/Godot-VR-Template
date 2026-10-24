@@ -1,0 +1,408 @@
+[gd_scene load_steps=43 format=3]
+
+[ext_resource type="PackedScene" uid="uid://cvn48xcmsmkrb" path="res://game/zones/zone_base.tscn" id="1_base"]
+[ext_resource type="Resource" path="res://game/zones/showcase/showcase_zone_info.tres" id="2_info"]
+[ext_resource type="Environment" uid="uid://er867l7dl10j" path="res://default_env.tres" id="3_env"]
+[ext_resource type="Material" uid="uid://csepeix2yvih" path="res://assets/prototype_materials/grass.tres" id="4_grass"]
+[ext_resource type="Material" uid="uid://ccdofvku4c7w3" path="res://assets/prototype_materials/stone_grey.tres" id="5_stone"]
+[ext_resource type="Material" uid="uid://c386ygo86nqfc" path="res://assets/prototype_materials/wood_brown.tres" id="6_wood"]
+[ext_resource type="Material" uid="uid://b1o2xnr4gi6r4" path="res://assets/prototype_materials/sandstone.tres" id="7_sand"]
+[ext_resource type="Script" path="res://components/system/feature_status_label.gd" id="8_status"]
+[ext_resource type="Script" path="res://components/system/feature_toggle_button.gd" id="9_toggle"]
+[ext_resource type="PackedScene" path="res://components/locomotion/teleport_area.tscn" id="10_tele"]
+[ext_resource type="PackedScene" path="res://components/locomotion/climbable_wall.tscn" id="11_climb"]
+[ext_resource type="PackedScene" path="res://components/locomotion/grapple_target.tscn" id="12_grap"]
+[ext_resource type="PackedScene" path="res://components/locomotion/wall_walk_surface.tscn" id="13_wall"]
+[ext_resource type="PackedScene" path="res://components/locomotion/world_grab_area.tscn" id="14_wgrb"]
+[ext_resource type="PackedScene" path="res://components/locomotion/wind_area.tscn" id="15_wind"]
+[ext_resource type="PackedScene" path="res://components/interactables/push_button.tscn" id="16_btn"]
+[ext_resource type="PackedScene" path="res://components/interactables/lever.tscn" id="17_lever"]
+[ext_resource type="PackedScene" path="res://components/interactables/slider.tscn" id="18_slider"]
+[ext_resource type="PackedScene" path="res://components/interactables/joystick.tscn" id="19_joy"]
+[ext_resource type="PackedScene" path="res://components/interactables/snap_zone.tscn" id="20_snap"]
+[ext_resource type="PackedScene" path="res://components/interactables/hand_pose_area.tscn" id="21_pose"]
+[ext_resource type="PackedScene" path="res://components/interactables/virtual_keyboard.tscn" id="22_kbd"]
+[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="23_vp"]
+[ext_resource type="PackedScene" path="res://game/zones/showcase/showcase_ui_panel.tscn" id="24_uipanel"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/user_settings/user_settings_ui.tscn" id="25_settings"]
+[ext_resource type="PackedScene" uid="uid://dbepe4i2q62yy" path="res://game/items/crate/crate.tscn" id="26_crate"]
+[ext_resource type="PackedScene" uid="uid://c4rpcr7s5pt3v" path="res://game/items/rock/rock.tscn" id="27_rock"]
+[ext_resource type="PackedScene" uid="uid://dm2e4qfiy0v0a" path="res://components/helpers/zone_save_point.tscn" id="28_save"]
+[ext_resource type="PackedScene" uid="uid://vm423o6hdlya" path="res://components/helpers/zone_switch_area.tscn" id="29_switch"]
+[ext_resource type="PackedScene" uid="uid://chch4r7wddwdj" path="res://game/objects/storage/storage_box.tscn" id="30_storage"]
+
+[sub_resource type="QuadMesh" id="Mesh_ground"]
+material = ExtResource("4_grass")
+size = Vector2(30, 30)
+
+[sub_resource type="BoxShape3D" id="Shape_ground"]
+size = Vector3(30, 1, 30)
+
+[sub_resource type="QuadMesh" id="Mesh_wall"]
+material = ExtResource("5_stone")
+size = Vector2(30, 4)
+
+[sub_resource type="BoxShape3D" id="Shape_wall"]
+size = Vector3(30, 4, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_table"]
+material = ExtResource("6_wood")
+size = Vector3(2.4, 0.9, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_table"]
+size = Vector3(2.4, 0.9, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_pedestal"]
+material = ExtResource("7_sand")
+size = Vector3(0.4, 1, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_pedestal"]
+size = Vector3(0.4, 1, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_portal"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.3, 0.5, 1, 0.35)
+
+[sub_resource type="BoxMesh" id="Mesh_portal"]
+material = SubResource("Mat_portal")
+size = Vector3(2, 3, 0.1)
+
+[sub_resource type="BoxShape3D" id="Shape_portal"]
+size = Vector3(2, 3, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_fall"]
+size = Vector3(80, 2, 80)
+
+[node name="ShowcaseZone" instance=ExtResource("1_base")]
+zone_info = ExtResource("2_info")
+
+[node name="World" type="Node3D" parent="." index="1"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+environment = ExtResource("3_env")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
+transform = Transform3D(-0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, 0.5, -0.5, 0, 8, 0)
+
+[node name="Ground" type="StaticBody3D" parent="World"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Ground"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("Mesh_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("Shape_ground")
+
+[node name="Boundary1" type="StaticBody3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -15)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Boundary1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+mesh = SubResource("Mesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Boundary1"]
+shape = SubResource("Shape_wall")
+
+[node name="Boundary2" type="StaticBody3D" parent="World"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15, 2, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Boundary2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+mesh = SubResource("Mesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Boundary2"]
+shape = SubResource("Shape_wall")
+
+[node name="Boundary3" type="StaticBody3D" parent="World"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 2, 15)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Boundary3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+mesh = SubResource("Mesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Boundary3"]
+shape = SubResource("Shape_wall")
+
+[node name="Boundary4" type="StaticBody3D" parent="World"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15, 2, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Boundary4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+mesh = SubResource("Mesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Boundary4"]
+shape = SubResource("Shape_wall")
+
+[node name="Welcome" type="Label3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+billboard = 1
+pixel_size = 0.004
+text = "VR Template Showcase"
+font_size = 96
+outline_size = 12
+
+[node name="LocomotionField" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -7)
+
+[node name="Status" type="Label3D" parent="LocomotionField"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+billboard = 1
+pixel_size = 0.003
+font_size = 48
+outline_size = 10
+script = ExtResource("8_status")
+title = "1 - Locomotion"
+features = Array[StringName]([&"teleport", &"climb", &"grapple", &"wall_walk", &"world_grab", &"wind", &"flight", &"glide", &"jog", &"physical_jump", &"footsteps", &"sprint"])
+per_line = 3
+
+[node name="TeleportArea" parent="LocomotionField" instance=ExtResource("10_tele")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 2)
+
+[node name="ClimbableWall" parent="LocomotionField" instance=ExtResource("11_climb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+
+[node name="GrappleTarget1" parent="LocomotionField" instance=ExtResource("12_grap")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 5, -6)
+
+[node name="GrappleTarget2" parent="LocomotionField" instance=ExtResource("12_grap")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 6, -6)
+
+[node name="WallWalkRamp" parent="LocomotionField" instance=ExtResource("13_wall")]
+transform = Transform3D(1, 0, 0, 0, 0.906308, -0.422618, 0, 0.422618, 0.906308, -5, 1.2, 1)
+
+[node name="WorldGrabArea" parent="LocomotionField" instance=ExtResource("14_wgrb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -2)
+
+[node name="WindArea" parent="LocomotionField" instance=ExtResource("15_wind")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 1)
+
+[node name="InteractionTable" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -7)
+
+[node name="Status" type="Label3D" parent="InteractionTable"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 0)
+billboard = 1
+pixel_size = 0.003
+font_size = 48
+outline_size = 10
+script = ExtResource("8_status")
+title = "2 - Interaction"
+features = Array[StringName]([&"pickup", &"ranged_pickup", &"collision_hands", &"poke", &"hand_models", &"haptics", &"hand_pose_areas"])
+per_line = 3
+
+[node name="Table" type="StaticBody3D" parent="InteractionTable"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InteractionTable/Table"]
+mesh = SubResource("Mesh_table")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionTable/Table"]
+shape = SubResource("Shape_table")
+
+[node name="PushButton" parent="InteractionTable" instance=ExtResource("16_btn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.92, 0.2)
+
+[node name="Lever" parent="InteractionTable" instance=ExtResource("17_lever")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.92, 0.2)
+
+[node name="Slider" parent="InteractionTable" instance=ExtResource("18_slider")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.91, 0.25)
+
+[node name="Joystick" parent="InteractionTable" instance=ExtResource("19_joy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0.92, 0.2)
+
+[node name="SnapZone" parent="InteractionTable" instance=ExtResource("20_snap")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 1.06, -0.25)
+
+[node name="HandPoseArea" parent="InteractionTable" instance=ExtResource("21_pose")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 1.2, 0.25)
+
+[node name="Crate" parent="InteractionTable" instance=ExtResource("26_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 0.3)
+item_id = "crate_showcase_1"
+
+[node name="Rock" parent="InteractionTable" instance=ExtResource("27_rock")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.06, -0.25)
+item_id = "rock_showcase_1"
+
+[node name="UIStation" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 8, 0, 6)
+
+[node name="Status" type="Label3D" parent="UIStation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+billboard = 1
+pixel_size = 0.003
+font_size = 48
+outline_size = 10
+script = ExtResource("8_status")
+title = "3 - UI"
+features = Array[StringName]([&"pointer", &"laser_visible", &"gaze_pointer", &"poke", &"virtual_keyboard"])
+per_line = 3
+
+[node name="Screen" parent="UIStation" instance=ExtResource("23_vp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+screen_size = Vector2(1.6, 0.96)
+scene = ExtResource("24_uipanel")
+viewport_size = Vector2(400, 240)
+update_mode = 2
+throttle_fps = 15.0
+transparent = 0
+unshaded = true
+
+[node name="VirtualKeyboard" parent="UIStation" instance=ExtResource("22_kbd")]
+transform = Transform3D(1, 0, 0, 0, 0.766044, 0.642788, 0, -0.642788, 0.766044, 0, 0.9, 0.5)
+
+[node name="ComfortKiosk" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -8, 0, 6)
+
+[node name="Status" type="Label3D" parent="ComfortKiosk"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+billboard = 1
+pixel_size = 0.003
+font_size = 48
+outline_size = 10
+script = ExtResource("8_status")
+title = "4 - Comfort & system"
+features = Array[StringName]([&"vignette", &"vignette_auto_adjust", &"passthrough", &"debug_hud", &"head_behavior", &"turn_mode", &"desktop_fallback", &"hand_tracking"])
+per_line = 3
+
+[node name="SettingsScreen" parent="ComfortKiosk" instance=ExtResource("23_vp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+screen_size = Vector2(1.1, 0.8)
+scene = ExtResource("25_settings")
+viewport_size = Vector2(220, 160)
+update_mode = 2
+throttle_fps = 15.0
+transparent = 0
+unshaded = true
+
+[node name="PassthroughPedestal" type="StaticBody3D" parent="ComfortKiosk"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.5, 0.6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ComfortKiosk/PassthroughPedestal"]
+mesh = SubResource("Mesh_pedestal")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ComfortKiosk/PassthroughPedestal"]
+shape = SubResource("Shape_pedestal")
+
+[node name="PassthroughButton" parent="ComfortKiosk" instance=ExtResource("16_btn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1.02, 0.6)
+
+[node name="Title" parent="ComfortKiosk/PassthroughButton" index="3"]
+text = "Passthrough"
+
+[node name="FeatureToggleButton" type="Node" parent="ComfortKiosk/PassthroughButton"]
+script = ExtResource("9_toggle")
+feature = &"passthrough"
+button = NodePath("../InteractableAreaButton")
+
+[node name="DebugHUDPedestal" type="StaticBody3D" parent="ComfortKiosk"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ComfortKiosk/DebugHUDPedestal"]
+mesh = SubResource("Mesh_pedestal")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ComfortKiosk/DebugHUDPedestal"]
+shape = SubResource("Shape_pedestal")
+
+[node name="DebugHUDButton" parent="ComfortKiosk" instance=ExtResource("16_btn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 0.6)
+
+[node name="Title" parent="ComfortKiosk/DebugHUDButton" index="3"]
+text = "Debug HUD"
+
+[node name="FeatureToggleButton" type="Node" parent="ComfortKiosk/DebugHUDButton"]
+script = ExtResource("9_toggle")
+feature = &"debug_hud"
+button = NodePath("../InteractableAreaButton")
+
+[node name="VignettePedestal" type="StaticBody3D" parent="ComfortKiosk"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.5, 0.6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ComfortKiosk/VignettePedestal"]
+mesh = SubResource("Mesh_pedestal")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ComfortKiosk/VignettePedestal"]
+shape = SubResource("Shape_pedestal")
+
+[node name="VignetteButton" parent="ComfortKiosk" instance=ExtResource("16_btn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 1.02, 0.6)
+
+[node name="Title" parent="ComfortKiosk/VignetteButton" index="3"]
+text = "Vignette"
+
+[node name="FeatureToggleButton" type="Node" parent="ComfortKiosk/VignetteButton"]
+script = ExtResource("9_toggle")
+feature = &"vignette"
+button = NodePath("../InteractableAreaButton")
+
+[node name="PersistenceCorner" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11)
+
+[node name="Status" type="Label3D" parent="PersistenceCorner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
+billboard = 1
+pixel_size = 0.003
+font_size = 48
+outline_size = 10
+script = ExtResource("8_status")
+title = "5 - Persistence"
+features = Array[StringName]([&"pockets", &"wrist_ui"])
+per_line = 3
+
+[node name="Hint" type="Label3D" parent="PersistenceCorner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0)
+billboard = 1
+pixel_size = 0.004
+text = "Save here - put a rock in a hip pocket - walk through the portal"
+font_size = 40
+outline_size = 12
+
+[node name="SavePoint" parent="PersistenceCorner" instance=ExtResource("28_save")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -2.5, 0, 0)
+
+[node name="StorageBox" parent="PersistenceCorner" instance=ExtResource("30_storage")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.5, 0, 0)
+
+[node name="Rock1" parent="PersistenceCorner" instance=ExtResource("27_rock")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.2, -1)
+item_id = "rock_showcase_2"
+
+[node name="Rock2" parent="PersistenceCorner" instance=ExtResource("27_rock")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.2, -1)
+item_id = "rock_showcase_3"
+
+[node name="Portal" type="MeshInstance3D" parent="PersistenceCorner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 3)
+mesh = SubResource("Mesh_portal")
+
+[node name="PortalTitle" type="Label3D" parent="PersistenceCorner/Portal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+billboard = 1
+pixel_size = 0.004
+text = "To Outside"
+font_size = 48
+outline_size = 12
+
+[node name="ToOutside" parent="PersistenceCorner" instance=ExtResource("29_switch")]
+zone_scene = "res://game/zones/outside/outside_zone.tscn"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PersistenceCorner/ToOutside"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 3)
+shape = SubResource("Shape_portal")
+
+[node name="FallReset" parent="." instance=ExtResource("29_switch")]
+spawn_node_name = "FromAnywhere"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FallReset"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
+shape = SubResource("Shape_fall")
+
+[node name="FromAnywhere" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+
+[editable path="ComfortKiosk/PassthroughButton"]
+[editable path="ComfortKiosk/DebugHUDButton"]
+[editable path="ComfortKiosk/VignetteButton"]

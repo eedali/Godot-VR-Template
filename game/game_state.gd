@@ -49,6 +49,22 @@ func new_game(difficulty := GameDifficulty.GAME_NORMAL) -> bool:
 	return load_world_state()
 
 
+## This method starts a new game in a specific zone instead of the
+## [member starting_zone] (used by the start menu's Showcase button).
+func new_game_in_zone(
+		zone : PersistentZoneInfo,
+		difficulty := GameDifficulty.GAME_NORMAL) -> bool:
+	if not zone:
+		push_error("GameState.new_game_in_zone: zone is null")
+		return false
+
+	# Clear game data, then point the world state at the requested zone
+	clear_all()
+	game_difficulty = difficulty
+	set_value("current_zone_id", zone.zone_id)
+	return load_world_state()
+
+
 ## This method loads a game from the specified save-game.
 func load_game(p_name : String) -> bool:
 	# Read data from the save-game file
@@ -60,14 +76,16 @@ func load_game(p_name : String) -> bool:
 
 
 ## This method saves the current game-state to memory then quits to the main
-## menu. It's possible to restore the previous game state by calling 
+## menu. It's possible to restore the previous game state by calling
 ## [method load_world_state].
 func quit_game() -> bool:
 	# Save the world state to memory in case we want to resume
 	if not save_world_state():
 		return false
 
-	# Exit to the main menu
+	# Exit to the main menu (save_world_state succeeded, so current_zone is valid)
+	if not is_instance_valid(current_zone):
+		return false
 	current_zone.exit_to_main_menu()
 	return true
 
@@ -94,7 +112,7 @@ func auto_save_game() -> bool:
 ## This method saves the world-state to the [PersistentWorld] system.
 func save_world_state() -> bool:
 	# Fail if not in a zone
-	if not PersistentStaging.instance or not current_zone:
+	if not PersistentStaging.instance or not is_instance_valid(current_zone):
 		return false
 
 	# Fail if no player body
@@ -120,6 +138,9 @@ func load_world_state() -> bool:
 	var zone_id = get_value("current_zone_id")
 	if not zone_id is String:
 		# Default to the starting zone
+		if not starting_zone:
+			push_error("GameState.starting_zone is not set")
+			return false
 		zone_id = starting_zone.zone_id
 
 	# Get the location
@@ -128,8 +149,13 @@ func load_world_state() -> bool:
 		# Default to null (spawn location in level)
 		location = null
 
-	# Restore the game difficulty
-	game_difficulty = get_value("game_difficulty")
+	# Restore the game difficulty (older save files may not contain it)
+	var difficulty = get_value("game_difficulty", GameDifficulty.GAME_NORMAL)
+	if difficulty is int and difficulty >= 0 and difficulty < GameDifficulty.GAME_MAX:
+		game_difficulty = difficulty
+	else:
+		push_warning("Invalid game_difficulty %s in save data; using normal" % [ difficulty ])
+		game_difficulty = GameDifficulty.GAME_NORMAL
 
 	# Get the zone
 	var zone := zone_database.get_zone(zone_id)

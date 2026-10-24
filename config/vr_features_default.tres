@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="VRFeatureConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://config/vr_feature_config.gd" id="1_vrcfg"]
+
+[resource]
+script = ExtResource("1_vrcfg")
+direct_movement = true
+strafe = true
+turn = true
+turn_mode = 0
+teleport = true
+jump = true
+physical_jump = false
+crouch = true
+sprint = true
+jog = false
+climb = false
+flight = false
+glide = false
+grapple = false
+wall_walk = false
+world_grab = false
+wind = false
+footsteps = false
+vignette = true
+vignette_auto_adjust = true
+head_behavior = 1
+height_calibration = true
+player_body = true
+loading_prompt = false
+hand_models = true
+collision_hands = true
+pickup = true
+ranged_pickup = true
+pointer = true
+laser_visible = true
+gaze_pointer = false
+poke = true
+pockets = true
+wrist_ui = true
+hand_pose_areas = false
+haptics = true
+virtual_keyboard = false
+hand_tracking = true
+passthrough = false
+desktop_fallback = true
+debug_hud = false
+target_refresh_rate = 0
+physics_rate_multiplier = 1
+remove_disabled_nodes = false

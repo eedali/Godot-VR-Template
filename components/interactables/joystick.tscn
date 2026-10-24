@@ -1,0 +1,64 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_joystick.gd" id="1_r"]
+[ext_resource type="Material" path="res://assets/prototype_materials/dark_brown.tres" id="2_r"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/interactables/interactable_handle.tscn" id="3_r"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_knob"]
+albedo_color = Color(0.85, 0.65, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="Mesh_knob"]
+material = SubResource("Mat_knob")
+radius = 0.035
+height = 0.07
+
+[sub_resource type="SphereShape3D" id="Shape_knob"]
+radius = 0.045
+
+[sub_resource type="BoxMesh" id="Mesh_base"]
+size = Vector3(0.16, 0.04, 0.16)
+
+[sub_resource type="CylinderMesh" id="Mesh_arm"]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 0.16
+
+[node name="Joystick" type="Node3D"]
+
+[node name="Base" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_base")
+surface_material_override/0 = ExtResource("2_r")
+
+[node name="Pivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+
+[node name="InteractableJoystick" type="Node3D" parent="Pivot"]
+script = ExtResource("1_r")
+joystick_x_limit_min = -30.0
+joystick_x_limit_max = 30.0
+joystick_y_limit_min = -30.0
+joystick_y_limit_max = 30.0
+default_on_release = true
+
+[node name="Stick" type="MeshInstance3D" parent="Pivot/InteractableJoystick"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -0.08)
+mesh = SubResource("Mesh_arm")
+
+[node name="HandleOrigin" type="Node3D" parent="Pivot/InteractableJoystick"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.16)
+
+[node name="InteractableHandle" parent="Pivot/InteractableJoystick/HandleOrigin" instance=ExtResource("3_r")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pivot/InteractableJoystick/HandleOrigin/InteractableHandle"]
+shape = SubResource("Shape_knob")
+
+[node name="Knob" type="MeshInstance3D" parent="Pivot/InteractableJoystick/HandleOrigin"]
+mesh = SubResource("Mesh_knob")
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Joystick"
+font_size = 48
+outline_size = 8

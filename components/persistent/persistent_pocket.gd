@@ -19,6 +19,11 @@ enum HeldBehavior {
 }
 
 
+## Meta flag set by [PlayerRig] on pockets switched off by the
+## [code]pockets[/code] feature (not by [member held_behavior])
+const FEATURE_DISABLED_META := &"vr_feature_disabled"
+
+
 # Group for world-data properties
 @export_group("World Data")
 
@@ -138,9 +143,12 @@ func _populate_pocket() -> void:
 	if not item:
 		return
 
-	# Put the item in the pocket
+	# Put the item in the pocket. A pocket switched off by the pockets feature
+	# could never hand it back, so then the item stays in the zone at the
+	# pocket instead. (Pockets disabled by held_behavior are filled as usual.)
 	item.global_transform = global_transform
-	pick_up_object.call_deferred(item)
+	if not get_meta(FEATURE_DISABLED_META, false):
+		pick_up_object.call_deferred(item)
 
 
 # Called when the parent pickable body is picked up

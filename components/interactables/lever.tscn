@@ -1,0 +1,58 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_hinge.gd" id="1_r"]
+[ext_resource type="Material" path="res://assets/prototype_materials/dark_brown.tres" id="2_r"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/interactables/interactable_handle.tscn" id="3_r"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_knob"]
+albedo_color = Color(0.85, 0.65, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="Mesh_knob"]
+material = SubResource("Mat_knob")
+radius = 0.035
+height = 0.07
+
+[sub_resource type="SphereShape3D" id="Shape_knob"]
+radius = 0.045
+
+[sub_resource type="BoxMesh" id="Mesh_base"]
+size = Vector3(0.16, 0.04, 0.16)
+
+[sub_resource type="CylinderMesh" id="Mesh_arm"]
+top_radius = 0.012
+bottom_radius = 0.012
+height = 0.3
+
+[node name="Lever" type="Node3D"]
+
+[node name="Base" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_base")
+surface_material_override/0 = ExtResource("2_r")
+
+[node name="InteractableHinge" type="Node3D" parent="."]
+script = ExtResource("1_r")
+hinge_limit_min = -45.0
+hinge_limit_max = 45.0
+
+[node name="Arm" type="MeshInstance3D" parent="InteractableHinge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+mesh = SubResource("Mesh_arm")
+
+[node name="HandleOrigin" type="Node3D" parent="InteractableHinge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+
+[node name="InteractableHandle" parent="InteractableHinge/HandleOrigin" instance=ExtResource("3_r")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableHinge/HandleOrigin/InteractableHandle"]
+shape = SubResource("Shape_knob")
+
+[node name="Knob" type="MeshInstance3D" parent="InteractableHinge/HandleOrigin"]
+mesh = SubResource("Mesh_knob")
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Lever"
+font_size = 48
+outline_size = 8

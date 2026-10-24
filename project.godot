@@ -22,6 +22,7 @@ config/icon="res://icon.png"
 [autoload]
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
+VRFeatures="*res://components/system/vr_features.gd"
 GameState="*res://game/game_state.tscn"
 XRToolsRumbleManager="*uid://by853dk86g1qw"
 
@@ -65,13 +66,26 @@ common/drop_mouse_on_gui_input_disabled=true
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/msaa_3d.mobile=1
+lights_and_shadows/directional_shadow/size.mobile=2048
+lights_and_shadows/positional_shadow/atlas_size.mobile=1024
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_environment="res://default_env.tres"
+
+[vr_template]
+
+feature_config="res://config/vr_features_default.tres"
 
 [xr]
 
 openxr/enabled=true
 openxr/foveation_level=3
 openxr/foveation_dynamic=true
+openxr/extensions/hand_tracking=true
+openxr/extensions/hand_tracking_unobstructed_data_source=true
+openxr/extensions/hand_tracking_controller_data_source=true
+openxr/extensions/hand_interaction_profile=true
+openxr/extensions/meta/passthrough=true
 shaders/enabled=true
 openxr/extensions/meta/color_space/starting_color_space=3

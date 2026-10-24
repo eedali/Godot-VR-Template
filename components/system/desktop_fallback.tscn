@@ -1,0 +1,32 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://components/system/desktop_fallback.gd" id="1_dfb"]
+[ext_resource type="PackedScene" uid="uid://bkse5rxsx5tb3" path="res://addons/godot-xr-tools/desktop-support/mouse_capture.tscn" id="2_capture"]
+[ext_resource type="PackedScene" uid="uid://6uusxts6n6gm" path="res://addons/godot-xr-tools/desktop-support/movement_desktop_direct.tscn" id="3_direct"]
+[ext_resource type="PackedScene" uid="uid://c4d13r420hnx2" path="res://addons/godot-xr-tools/desktop-support/movement_desktop_turn.tscn" id="4_turn"]
+[ext_resource type="PackedScene" uid="uid://dluln6777mmh3" path="res://addons/godot-xr-tools/desktop-support/movement_desktop_jump.tscn" id="5_jump"]
+[ext_resource type="PackedScene" uid="uid://d2iqcc25yvk61" path="res://addons/godot-xr-tools/desktop-support/movement_desktop_crouch.tscn" id="6_crouch"]
+[ext_resource type="PackedScene" uid="uid://dgm5op1hausw5" path="res://addons/godot-xr-tools/desktop-support/movement_desktop_sprint.tscn" id="7_sprint"]
+
+[node name="DesktopFallback" type="Node3D"]
+script = ExtResource("1_dfb")
+
+[node name="MouseCapture" parent="." instance=ExtResource("2_capture")]
+
+[node name="MovementDesktopDirect" parent="." instance=ExtResource("3_direct")]
+strafe = true
+input_forward = "desktop_forward"
+input_backward = "desktop_back"
+input_left = "desktop_left"
+input_right = "desktop_right"
+
+[node name="MovementDesktopTurn" parent="." instance=ExtResource("4_turn")]
+
+[node name="MovementDesktopJump" parent="." instance=ExtResource("5_jump")]
+jump_button_action = "desktop_jump"
+
+[node name="MovementDesktopCrouch" parent="." instance=ExtResource("6_crouch")]
+crouch_button_action = "desktop_crouch"
+
+[node name="MovementDesktopSprint" parent="." instance=ExtResource("7_sprint")]
+sprint_button = "desktop_sprint"

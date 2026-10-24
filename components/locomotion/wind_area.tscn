@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/objects/wind_area.tscn" id="1_r"]
+
+[sub_resource type="BoxShape3D" id="Shape_area"]
+size = Vector3(2, 3, 6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_area"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.7, 0.9, 1, 0.12)
+
+[sub_resource type="BoxMesh" id="Mesh_area"]
+material = SubResource("Mat_area")
+flip_faces = true
+size = Vector3(2, 3, 6)
+
+[node name="WindArea" instance=ExtResource("1_r")]
+wind_vector = Vector3(0, 0, -3)
+
+[node name="CollisionShape3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("Shape_area")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+mesh = SubResource("Mesh_area")
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Wind"
+font_size = 48
+outline_size = 8

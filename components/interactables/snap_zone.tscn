@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/objects/snap_zone.tscn" id="1_r"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_ring"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.2, 0.6, 1, 0.5)
+
+[sub_resource type="TorusMesh" id="Mesh_ring"]
+material = SubResource("Mat_ring")
+inner_radius = 0.09
+outer_radius = 0.1
+
+[node name="SnapZone" instance=ExtResource("1_r")]
+
+[node name="Ring" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_ring")
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+billboard = 1
+pixel_size = 0.002
+text = "Snap zone"
+font_size = 48
+outline_size = 8

@@ -1,3 +1,10 @@
+# Unreleased (eedali/Godot-VR-Template overhaul)
+ - Upgrade Godot XR Tools to 4.5.2
+ - One VRFeatureConfig resource switches every VR mechanic on or off
+ - PlayerRig component replaces the rig copied into every zone
+ - All XR Tools mechanics wired in, showcase zone, settings UI in the start menu
+ - Details: docs/CHANGELOG.md
+
 # 4.5.0
  - Upgrade Godot XR Tools to 4.5.1
  - Upgrade to using Godot 4.6

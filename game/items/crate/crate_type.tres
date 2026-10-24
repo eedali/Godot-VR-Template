@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ItemType" load_steps=2 format=3 uid="uid://dag4mhfys4x5d"]
+[gd_resource type="Resource" script_class="PersistentItemType" load_steps=2 format=3 uid="uid://dag4mhfys4x5d"]
 
 [ext_resource type="Script" path="res://components/persistent/persistent_item_type.gd" id="1_uqv6g"]
 

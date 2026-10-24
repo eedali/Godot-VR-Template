@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://cl8q8f32imusk"]
+[gd_scene load_steps=4 format=3 uid="uid://cl8q8f32imusk"]
 
 [ext_resource type="Script" path="res://game/start_scene/start_ui.gd" id="1_n87es"]
+[ext_resource type="Resource" path="res://game/zones/showcase/showcase_zone_info.tres" id="2_show"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/user_settings/user_settings_ui.tscn" id="3_settings"]
 
 [node name="StartUI" type="CenterContainer"]
 anchors_preset = 15
@@ -10,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 script = ExtResource("1_n87es")
+showcase_zone = ExtResource("2_show")
 
 [node name="MainMenu" type="VBoxContainer" parent="."]
 visible = false
@@ -50,6 +53,10 @@ text = "Normal"
 layout_mode = 2
 text = "Hard"
 
+[node name="ShowcaseBtn" type="Button" parent="NewGame"]
+layout_mode = 2
+text = "Showcase"
+
 [node name="BackBtn" type="Button" parent="NewGame"]
 layout_mode = 2
 text = "Back"
@@ -89,9 +96,13 @@ text = "Back	"
 visible = false
 layout_mode = 2
 
+[node name="UserSettingsUI" parent="Options" instance=ExtResource("3_settings")]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
 [node name="BackBtn" type="Button" parent="Options"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 16
 text = "Back	"
 
 [connection signal="pressed" from="MainMenu/NewGameBtn" to="." method="_on_new_game_btn_pressed"]
@@ -101,6 +112,7 @@ text = "Back	"
 [connection signal="pressed" from="NewGame/EasyBtn" to="." method="_on_easy_btn_pressed"]
 [connection signal="pressed" from="NewGame/NormalBtn" to="." method="_on_normal_btn_pressed"]
 [connection signal="pressed" from="NewGame/HardBtn" to="." method="_on_hard_btn_pressed"]
+[connection signal="pressed" from="NewGame/ShowcaseBtn" to="." method="_on_showcase_btn_pressed"]
 [connection signal="pressed" from="NewGame/BackBtn" to="." method="_on_back_btn_pressed"]
 [connection signal="pressed" from="LoadGame/StartBtn" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="LoadGame/BackBtn" to="." method="_on_back_btn_pressed"]

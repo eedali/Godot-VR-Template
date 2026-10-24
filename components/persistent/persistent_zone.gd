@@ -74,23 +74,28 @@ func scene_loaded(user_data = null):
 			if not items_in_zone.has(item_id):
 				create_item_instance(item_id)
 
-	# Create items held by the players left hand
-	var left_pickup := XRToolsFunctionPickup.find_left($XROrigin3D)
-	var left_item_id = PersistentWorld.instance.get_value("player.left_hand")
-	if left_pickup and left_item_id is String:
-		var left_instance := create_item_instance(left_item_id)
-		if left_instance:
-			left_instance.global_transform = left_pickup.global_transform
-			left_pickup._pick_up_object.call_deferred(left_instance)
+	# Create items held by the players hands
+	_restore_held_item(
+			XRToolsFunctionPickup.find_left($XROrigin3D),
+			PersistentWorld.instance.get_value("player.left_hand"))
+	_restore_held_item(
+			XRToolsFunctionPickup.find_right($XROrigin3D),
+			PersistentWorld.instance.get_value("player.right_hand"))
 
-	# Create items held by the players right hand
-	var right_pickup := XRToolsFunctionPickup.find_right($XROrigin3D)
-	var right_item_id = PersistentWorld.instance.get_value("player.right_hand")
-	if right_pickup and right_item_id is String:
-		var right_instance := create_item_instance(right_item_id)
-		if right_instance:
-			right_instance.global_transform = right_pickup.global_transform
-			right_pickup._pick_up_object.call_deferred(right_instance)
+
+# Re-create an item the player carried into this zone. If the hand cannot
+# hold it (pickup feature off) the item is dropped at the hand position and
+# becomes a normal zone item, instead of sticking to a hand that cannot let go.
+func _restore_held_item(pickup : XRToolsFunctionPickup, item_id : Variant) -> void:
+	if not item_id is String:
+		return
+	var instance := create_item_instance(item_id)
+	if not instance:
+		return
+	if pickup:
+		instance.global_transform = pickup.global_transform
+		if pickup.enabled:
+			pickup._pick_up_object.call_deferred(instance)
 
 
 ## Handle zone exiting
@@ -100,8 +105,9 @@ func scene_exiting(user_data = null):
 	# Ensure the zone state is saved before exiting the zone
 	save_world_state()
 
-	# Clear the current zone
-	GameState.current_zone = self
+	# Clear the current zone (only if it still points at us)
+	if GameState.current_zone == self:
+		GameState.current_zone = null
 
 
 ## This method saves the state of the zone to the [PersistentWorld]. This gets

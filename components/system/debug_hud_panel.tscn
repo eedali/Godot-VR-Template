@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://components/system/debug_hud_panel.gd" id="1_panel"]
+
+[node name="DebugHUDPanel" type="PanelContainer"]
+offset_right = 480.0
+offset_bottom = 120.0
+script = ExtResource("1_panel")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Margin"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "FPS -"
+
+[node name="Timer" type="Timer" parent="."]

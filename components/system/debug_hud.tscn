@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://components/system/debug_hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_vp"]
+[ext_resource type="PackedScene" path="res://components/system/debug_hud_panel.tscn" id="3_panel"]
+
+[node name="DebugHUD" type="Node3D"]
+script = ExtResource("1_hud")
+
+[node name="Viewport" parent="." instance=ExtResource("2_vp")]
+screen_size = Vector2(0.24, 0.06)
+enabled = false
+collision_layer = 0
+scene = ExtResource("3_panel")
+viewport_size = Vector2(480, 120)
+update_mode = 2
+throttle_fps = 4.0
+transparent = 0
+unshaded = true

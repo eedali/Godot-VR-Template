@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Agent",
+      "WebSearch",
+      "WebFetch(domain:*)"
+    ],
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(git reset --hard *)",
+      "Bash(git rebase *)",
+      "Bash(git branch -D *)",
+      "Bash(git clean *)",
+      "Bash(rm -rf addons*)",
+      "Bash(rm -rf .godot*)",
+      "Read(./.env)"
+    ]
+  },
+  "env": {
+    "GODOT_BIN": "C:/Open/Godot_v4.6-stable_win64_console.exe",
+    "GIT_TERMINAL_PROMPT": "0",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1"
+  }
+}

@@ -1,65 +1,104 @@
 extends CenterContainer
 
-@onready var save_list_node = $LoadGame/SaveList
-var save_list : Array
+
+## Start Menu UI
+##
+## The 2D menu shown on the start scene screen. It switches between the main
+## menu, new-game, load-game and options panes and starts the game through
+## the [GameState] autoload. The options pane embeds the XR Tools user
+## settings UI (snap turning, dead zones, haptics, player height).
+
+
+## Panes of the start menu
+enum Pane {
+	MAIN_MENU,
+	NEW_GAME,
+	LOAD_GAME,
+	OPTIONS,
+}
+
+
+## Zone started by the "Showcase" button of the new-game pane
+@export var showcase_zone : PersistentZoneInfo
+
+## Names of the save games shown in the load-game pane
+var save_list : Array[String] = []
+
+@onready var _save_list_node : ItemList = $LoadGame/SaveList
+
 
 # Called when the node enters the scene tree for the first time.
-func _ready():
-	_set_pane(1)
+func _ready() -> void:
+	_set_pane(Pane.MAIN_MENU)
 
 	# Get our list of save games
 	if PersistentWorld.instance:
 		save_list = PersistentWorld.instance.list_saves()
 
-		save_list_node.clear()
+		_save_list_node.clear()
 		for entry in save_list:
-			save_list_node.add_item(entry)
+			_save_list_node.add_item(entry)
 
-	$MainMenu/LoadGameBtn.disabled = save_list.size() == 0
+	$MainMenu/LoadGameBtn.disabled = save_list.is_empty()
 
-func _set_pane(p_no):
-	$MainMenu.visible = p_no == 1
-	$NewGame.visible = p_no == 2
-	$LoadGame.visible = p_no == 3
-	$Options.visible = p_no == 4
+
+# Show only the requested pane
+func _set_pane(p_pane : Pane) -> void:
+	$MainMenu.visible = p_pane == Pane.MAIN_MENU
+	$NewGame.visible = p_pane == Pane.NEW_GAME
+	$LoadGame.visible = p_pane == Pane.LOAD_GAME
+	$Options.visible = p_pane == Pane.OPTIONS
+
 
 # Main menu
 
-func _on_new_game_btn_pressed():
-	_set_pane(2)
+func _on_new_game_btn_pressed() -> void:
+	_set_pane(Pane.NEW_GAME)
 
-func _on_load_game_btn_pressed():
-	_set_pane(3)
 
-func _on_options_btn_pressed():
-	_set_pane(4)
+func _on_load_game_btn_pressed() -> void:
+	_set_pane(Pane.LOAD_GAME)
 
-func _on_exit_btn_pressed():
+
+func _on_options_btn_pressed() -> void:
+	_set_pane(Pane.OPTIONS)
+
+
+func _on_exit_btn_pressed() -> void:
 	get_tree().quit()
+
 
 # New game
 
-func _on_easy_btn_pressed():
+func _on_easy_btn_pressed() -> void:
 	GameState.new_game(GameState.GameDifficulty.GAME_EASY)
 
-func _on_normal_btn_pressed():
+
+func _on_normal_btn_pressed() -> void:
 	GameState.new_game(GameState.GameDifficulty.GAME_NORMAL)
 
-func _on_hard_btn_pressed():
+
+func _on_hard_btn_pressed() -> void:
 	GameState.new_game(GameState.GameDifficulty.GAME_HARD)
 
-func _on_back_btn_pressed():
-	_set_pane(1)
+
+func _on_showcase_btn_pressed() -> void:
+	GameState.new_game_in_zone(showcase_zone)
+
+
+func _on_back_btn_pressed() -> void:
+	_set_pane(Pane.MAIN_MENU)
+
 
 # Load game
 
-func _on_start_button_pressed():
-	var selected_items = save_list_node.get_selected_items()
-	if selected_items.size() == 1:
-		# Should be only one!
-		var selected_item = selected_items[0]
-		print("Selected item: ", selected_item)
+func _on_start_button_pressed() -> void:
+	var selected_items := _save_list_node.get_selected_items()
+	if selected_items.size() != 1:
+		return
 
-		var save_name = save_list[selected_item]
-		print("Loading save: ", save_name)
-		GameState.load_game(save_name)
+	var selected_item : int = selected_items[0]
+	if selected_item < 0 or selected_item >= save_list.size():
+		return
+
+	GameState.load_game(save_list[selected_item])
