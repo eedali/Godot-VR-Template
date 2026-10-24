@@ -12,6 +12,11 @@ cd "$(dirname "$0")/.." || exit 1
 LOGS="build/claude-logs"
 mkdir -p "$LOGS"
 GODOT="bash tools/godot.sh"
+# Running the project (smoke test, headless run) with OpenXR enabled and no
+# headset pops up a blocking "OpenXR was requested but failed to start" alert
+# on Windows. --xr-mode off skips OpenXR initialisation; XR Tools then takes
+# the same "XR failed" desktop path it takes without a headset.
+RUN_FLAGS="--headless --xr-mode off"
 DO_EXPORT=0
 DO_RUN=0
 for arg in "$@"; do
@@ -49,7 +54,7 @@ fi
 
 # ------------------------------------------------------------- 3. smoke test
 step "2/4 Smoke test (compile every script, load + instantiate every scene/resource)"
-if $GODOT --headless --path . --script res://tools/smoke_test.gd > "$LOGS/smoke.log" 2>&1; then
+if $GODOT $RUN_FLAGS --path . --script res://tools/smoke_test.gd > "$LOGS/smoke.log" 2>&1; then
 	grep -E "smoke_test:" "$LOGS/smoke.log" || true
 	pass "smoke test"
 else
@@ -73,7 +78,7 @@ fi
 # ------------------------------------------------------------ 5. run / export
 step "4/4 Optional: run / export"
 if [ "$DO_RUN" -eq 1 ]; then
-	timeout 180 $GODOT --headless --path . --quit-after 240 > "$LOGS/run.log" 2>&1
+	timeout 180 $GODOT $RUN_FLAGS --path . --quit-after 240 > "$LOGS/run.log" 2>&1
 	if grep -E -q "SCRIPT ERROR|Parse Error" "$LOGS/run.log"; then
 		grep -E "SCRIPT ERROR|Parse Error" -A3 "$LOGS/run.log" | head -60
 		fail "headless run hit script errors (see $LOGS/run.log)"

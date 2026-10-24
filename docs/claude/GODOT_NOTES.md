@@ -10,10 +10,14 @@ open. Read before Phase 1.
 | Import / refresh class cache & uids | `godot --headless --path . --import` |
 | Parse one script | `godot --headless --path . --check-only --script res://x.gd` — **unreliable here**: autoload names (`GameState`, `XRToolsUserSettings`) are not resolved in this mode; use the smoke test instead |
 | Run a SceneTree script | `godot --headless --path . --script res://tools/x.gd` (script must `extends SceneTree` or `MainLoop`) |
-| Run main scene N frames | `godot --headless --path . --quit-after 240` |
-| Run a specific scene | `godot --headless --path . --quit-after 60 res://game/zones/outside/outside_zone.tscn` |
+| Run main scene N frames | `godot --headless --xr-mode off --path . --quit-after 240` |
+| Run a specific scene | `godot --headless --xr-mode off --path . --quit-after 60 res://game/zones/outside/outside_zone.tscn` |
 | Export | `godot --headless --path . --export-debug "Windows" build/windows/Game.exe` |
 | Android template install (once) | `godot --headless --path . --install-android-build-template --quit` |
+
+Anything that *runs* the project (`--script`, `--quit-after`, a scene path)
+needs `--xr-mode off`: otherwise OpenXR init fails without a headset and Godot
+shows a blocking modal alert on the desktop even in `--headless` mode.
 
 Always go through `bash tools/godot.sh` — it picks the **console** build so output
 reaches the terminal (the GUI exe prints nothing on Windows).

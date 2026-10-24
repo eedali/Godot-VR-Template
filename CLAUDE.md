@@ -77,7 +77,7 @@ done or hard-blocked. Read, in this order, before touching anything:
 bash tools/check.sh              # import + script checks + smoke test (+ gdlint if present)
 bash tools/check.sh --export     # same, plus a Windows debug export
 bash tools/godot.sh --headless --path . --import
-bash tools/godot.sh --headless --path . --script res://tools/smoke_test.gd
+bash tools/godot.sh --headless --xr-mode off --path . --script res://tools/smoke_test.gd
 bash tools/setup_vendors.sh      # install OpenXR vendors addon if missing
 bash tools/git_setup.sh          # branch + credential helper setup (phase 0)
 ```

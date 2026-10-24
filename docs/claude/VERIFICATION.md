@@ -17,15 +17,21 @@ What it does:
 | Step | Command | Fails when |
 |---|---|---|
 | Import | `godot --headless --path . --import` | log contains script/resource load errors |
-| Smoke | `godot --headless --path . --script res://tools/smoke_test.gd` | any script fails to compile (`can_instantiate()`), any scene/resource has a missing dependency or fails to load/instantiate; rig path assertions fail |
+| Smoke | `godot --headless --xr-mode off --path . --script res://tools/smoke_test.gd` | any script fails to compile (`can_instantiate()`), any scene/resource has a missing dependency or fails to load/instantiate; rig path assertions fail |
 | Lint | `gdlint components game tools` (only if installed) | lint errors |
-| Run | `godot --headless --path . --quit-after 240` | `SCRIPT ERROR` in log |
+| Run | `godot --headless --xr-mode off --path . --quit-after 240` | `SCRIPT ERROR` in log |
 | Export | `godot --headless --path . --export-debug "Windows" build/windows/Game.exe` | exe/pck missing |
 
 Why there is no per-script `--check-only` step: in this project it reports
 `Identifier not found: GameState` / `XRToolsUserSettings` because autoload
 singletons are not registered in that mode. The smoke test compiles every script
 with the project loaded, so it is the reliable check (verified on 4.6-stable).
+
+**Always pass `--xr-mode off` when running the project** (smoke test, headless
+run, single scene). Without it Godot tries to start OpenXR, finds no headset and
+opens a blocking Windows alert ("OpenXR was requested but failed to start") on
+the user's screen. Import and export run the editor, which does not start
+OpenXR, so they do not need the flag.
 
 Expected noise you may ignore in logs: `OpenXR: Failed to initialize`,
 `Failed to create XR instance`, `No XR interface`, anything about `WebXR`
@@ -42,7 +48,7 @@ otherwise scenes using it by class will fail to load.
 instantiates it inside the tree:
 
 ```bash
-bash tools/godot.sh --headless --path . --quit-after 60 res://game/zones/showcase/showcase_zone.tscn
+bash tools/godot.sh --headless --xr-mode off --path . --quit-after 60 res://game/zones/showcase/showcase_zone.tscn
 ```
 
 (A zone run outside staging will complain about missing `PersistentStaging.instance`

@@ -12,21 +12,21 @@ Branch: `claude/template-overhaul`. Commit prefix per phase is given below.
 
 ## Phase 0 — Setup & baseline (`chore:`)
 
-- [ ] 0.1 Run `bash tools/git_setup.sh`. Confirm you are on `claude/template-overhaul`
+- [x] 0.1 Run `bash tools/git_setup.sh`. Confirm you are on `claude/template-overhaul`
       and that any pre-existing local changes were committed.
-- [ ] 0.2 Append to `.gitignore` (if missing): `build/claude-logs/` and
+- [x] 0.2 Append to `.gitignore` (if missing): `build/claude-logs/` and
       `.claude/settings.local.json`.
-- [ ] 0.3 `bash tools/godot.sh --version` works. If not, find the console
+- [x] 0.3 `bash tools/godot.sh --version` works. If not, find the console
       binary under `C:/Open/` and fix `GODOT_BIN` in `.claude/settings.json`
       and `tools/godot.sh`.
-- [ ] 0.4 `bash tools/setup_vendors.sh` (installs `addons/godotopenxrvendors`
+- [x] 0.4 `bash tools/setup_vendors.sh` (installs `addons/godotopenxrvendors`
       if absent; the folder is gitignored).
-- [ ] 0.5 Run `bash tools/check.sh --run` once **before changing any game code**
+- [x] 0.5 Run `bash tools/check.sh --run` once **before changing any game code**
       and copy the summary into `PROGRESS.md` as the baseline (a failing
       baseline is information, not a blocker — note which checks fail and why).
-- [ ] 0.6 If `gdlint` is missing and `pip`/`python` exist, `pip install 'gdtoolkit==4.*'`
+- [x] 0.6 If `gdlint` is missing and `pip`/`python` exist, `pip install 'gdtoolkit==4.*'`
       (user install). If Python is missing, note it and continue; lint is optional.
-- [ ] 0.7 Commit anything still uncommitted (`chore: add Claude Code project tooling`)
+- [x] 0.7 Commit anything still uncommitted (`chore: add Claude Code project tooling`)
       and push the branch (`git push -u origin claude/template-overhaul`). If the
       push opens a credential window or fails, follow CLAUDE.md "Git & GitHub".
 

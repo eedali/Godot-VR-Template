@@ -11,8 +11,8 @@ VERSION="${OPENXR_VENDORS_VERSION:-4.3.0-stable}"
 TARGET="addons/godotopenxrvendors"
 URL="https://github.com/GodotVR/godot_openxr_vendors/releases/download/${VERSION}/godotopenxrvendorsaddon.zip"
 
-if [ -f "$TARGET/plugin.cfg" ]; then
-	echo "OpenXR Vendors already installed: $(grep -E '^version=' "$TARGET/plugin.cfg" || echo "$TARGET")"
+if [ -f "$TARGET/plugin.gdextension" ]; then
+	echo "OpenXR Vendors already installed: $(grep -m1 -E "^## " "$TARGET/GodotOpenXRVendors_CHANGES.md" 2>/dev/null || echo "$TARGET")"
 	exit 0
 fi
 
