@@ -100,8 +100,9 @@ func scene_exiting(user_data = null):
 	# Ensure the zone state is saved before exiting the zone
 	save_world_state()
 
-	# Clear the current zone
-	GameState.current_zone = self
+	# Clear the current zone (only if it still points at us)
+	if GameState.current_zone == self:
+		GameState.current_zone = null
 
 
 ## This method saves the state of the zone to the [PersistentWorld]. This gets
