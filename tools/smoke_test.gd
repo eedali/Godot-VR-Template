@@ -26,6 +26,35 @@ const EXTRA_FILES : Array[String] = [
 	"res://default_env.tres",
 ]
 
+## Every VRFeatureConfig setting named in docs/claude/FEATURES.md (plus the
+## behaviour switch from ARCHITECTURE.md). Renaming or dropping a toggle fails
+## the smoke test; add new toggles here and to FEATURES.md together.
+const REQUIRED_FEATURES : Array[StringName] = [
+	# Locomotion
+	&"direct_movement", &"strafe", &"turn", &"turn_mode", &"teleport", &"jump",
+	&"physical_jump", &"crouch", &"sprint", &"jog", &"climb", &"flight", &"glide",
+	&"grapple", &"wall_walk", &"world_grab", &"wind", &"footsteps",
+	# Comfort
+	&"vignette", &"vignette_auto_adjust", &"head_behavior", &"height_calibration",
+	&"player_body", &"loading_prompt",
+	# Hands & interaction
+	&"hand_models", &"collision_hands", &"pickup", &"ranged_pickup", &"pointer",
+	&"laser_visible", &"gaze_pointer", &"poke", &"pockets", &"wrist_ui",
+	&"hand_pose_areas", &"haptics", &"virtual_keyboard",
+	# System
+	&"hand_tracking", &"passthrough", &"desktop_fallback", &"debug_hud",
+	&"target_refresh_rate", &"physics_rate_multiplier",
+	# Behaviour
+	&"remove_disabled_nodes",
+]
+
+## Minimum number of settings the feature configuration must expose
+const MIN_FEATURE_COUNT : int = 40
+
+## Script and default resource of the feature configuration
+const FEATURE_CONFIG_SCRIPT := "res://config/vr_feature_config.gd"
+const FEATURE_CONFIG_DEFAULT := "res://config/vr_features_default.tres"
+
 var _failures : Array[String] = []
 var _checked : int = 0
 
@@ -44,6 +73,8 @@ func _run() -> void:
 				_failures.append(file + " (missing)")
 			continue
 		_check(file)
+
+	_check_feature_config()
 
 	print("smoke_test: %d files checked, %d failure(s)" % [_checked, _failures.size()])
 	for failure in _failures:
@@ -122,3 +153,33 @@ func _dependency_exists(dep : String) -> bool:
 		if id != ResourceUID.INVALID_ID and ResourceUID.has_id(id):
 			return ResourceLoader.exists(ResourceUID.get_id_path(id))
 	return false
+
+
+## The feature configuration must expose every required toggle, and the
+## shipped default resource must load as that class.
+func _check_feature_config() -> void:
+	var script := load(FEATURE_CONFIG_SCRIPT) as GDScript
+	if not script or not script.can_instantiate():
+		_failures.append(FEATURE_CONFIG_SCRIPT + " (cannot instantiate VRFeatureConfig)")
+		return
+
+	var config : Resource = script.new()
+	var names : Array = config.get_feature_names()
+	for feature in REQUIRED_FEATURES:
+		if not names.has(feature):
+			_failures.append(FEATURE_CONFIG_SCRIPT + " (missing feature toggle: %s)" % feature)
+	if names.size() < MIN_FEATURE_COUNT:
+		_failures.append(FEATURE_CONFIG_SCRIPT + " (only %d settings, expected >= %d)" % [
+			names.size(), MIN_FEATURE_COUNT])
+
+	var defaults := load(FEATURE_CONFIG_DEFAULT)
+	if not defaults or defaults.get_script() != script:
+		_failures.append(FEATURE_CONFIG_DEFAULT + " (not a VRFeatureConfig)")
+	print("smoke_test: VRFeatureConfig exposes %d settings" % names.size())
+
+	# The autoload must be registered and answer queries
+	var features := root.get_node_or_null("VRFeatures")
+	if not features or not features.has_method("is_enabled"):
+		_failures.append("project.godot (VRFeatures autoload missing)")
+	elif not features.config or features.config.get_script() != script:
+		_failures.append("VRFeatures (active config is not a VRFeatureConfig)")

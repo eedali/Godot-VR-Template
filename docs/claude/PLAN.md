@@ -67,20 +67,20 @@ other than bug fixes.
 
 Per `ARCHITECTURE.md §1–2`:
 
-- [ ] 2.1 Create `config/vr_feature_config.gd` (`class_name VRFeatureConfig`)
+- [x] 2.1 Create `config/vr_feature_config.gd` (`class_name VRFeatureConfig`)
       with every toggle from `FEATURES.md` (names exactly as listed).
-- [ ] 2.2 Create `config/vr_features_default.tres` (defaults: today's behaviour
+- [x] 2.2 Create `config/vr_features_default.tres` (defaults: today's behaviour
       + `teleport`, `vignette`, `haptics`, `hand_tracking`, `desktop_fallback` on).
-- [ ] 2.3 Create `components/system/vr_features.gd` autoload; register
+- [x] 2.3 Create `components/system/vr_features.gd` autoload; register
       `VRFeatures` in `project.godot` `[autoload]` **before** `GameState`.
-- [ ] 2.4 Add `SCAN_DIRS` entry `res://config` to `tools/smoke_test.gd` (already
+- [x] 2.4 Add `SCAN_DIRS` entry `res://config` to `tools/smoke_test.gd` (already
       present) and extend the smoke test with an assertion that
       `VRFeatureConfig.new()` exposes every name in a `REQUIRED_FEATURES` list
       copied from `FEATURES.md` (so a renamed toggle fails the check).
-- [ ] 2.5 Write `docs/HOWTO_TOGGLE.md`: how to copy the default resource, point
+- [x] 2.5 Write `docs/HOWTO_TOGGLE.md`: how to copy the default resource, point
       the project setting `vr_template/feature_config` at it, and what each
       toggle does (table generated from `FEATURES.md`).
-- [ ] 2.6 Check green. Commit, push.
+- [x] 2.6 Check green. Commit, push.
 
 **Acceptance:** `VRFeatures.is_enabled(&"teleport")` works in a headless run
 (`--run` log shows no errors); the config has ≥ 40 toggles.

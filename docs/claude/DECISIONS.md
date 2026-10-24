@@ -70,3 +70,36 @@ Context: AUDIT A7 named the three `*_zone_info.tres`; the four
 `PersistentItemType`).
 Decision: fixed all seven headers.
 Reversible: yes.
+
+### D-6 — `head_behavior` instead of `head_fade`   (phase 2, 2026-10-24)
+Context: FEATURES.md named the head-in-wall toggle `head_fade`, while
+ARCHITECTURE.md and PLAN 4.2 use `head_behavior` with the three XR Tools modes
+(Push away / Fade / Disabled).
+Decision: one setting, `head_behavior` (int enum mirroring
+`XRToolsPlayerBody.head_behavior_mode`); FEATURES.md updated. A bool cannot
+express three modes.
+Alternatives: both names (two switches for one thing).
+Reversible: yes.
+
+### D-7 — `VRFeatures` API details   (phase 2, 2026-10-24)
+Context: ARCHITECTURE §2 sketches `feature_changed(name, enabled : bool)` but
+some settings are ints/enums (`turn_mode`, `head_behavior`,
+`target_refresh_rate`, `physics_rate_multiplier`).
+Decision: keep `feature_changed` for bool toggles and add
+`value_changed(feature, value)` emitted for every change (rigs listen to this
+one) plus `set_value()`; values are `type_convert`ed to the setting's type.
+The config is loaded in `_init` (not `_ready`) so other autoloads/scenes can
+query it from their own `_ready`. The project setting
+`vr_template/feature_config` is written to `project.godot` (discoverable in
+Project Settings) and still read with a default.
+Alternatives: a Variant-typed `feature_changed` (breaks the documented
+signature).
+Reversible: yes.
+
+### D-8 — `loading_prompt` semantics   (phase 2, 2026-10-24)
+Context: today the first scene load shows "hold to continue" and
+`GameStaging` clears `prompt_for_continue` after it. ARCHITECTURE defaults
+`loading_prompt` to false.
+Decision: `loading_prompt = true` keeps the prompt on every load;
+false (default) is today's behaviour (first load only).
+Reversible: yes.

@@ -9,7 +9,7 @@ every "done" must name the log file or command that proved it.
 |---|---|---|---|---|
 | 0 Setup & baseline | done | ae0cb83, (this) | `build/claude-logs/` baseline above | gdlint present; vendors 4.3.0 installed |
 | 1 Audit fixes | done | d15845b, (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED (`build/claude-logs/run.log`) | A6 skipped (`[~]`, D-4); gdlint now clean |
-| 2 Feature config | todo | | | |
+| 2 Feature config | done | (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED; smoke log `VRFeatureConfig exposes 44 settings`; headless probe: `VRFeatures.is_enabled(&"teleport") == true`, `set_value(&"teleport", 0)` → false, unknown name → warning | 44 settings |
 | 3 PlayerRig refactor | todo | | | |
 | 4 Mechanics & components | todo | | | |
 | 5 Showcase & menu | todo | | | |

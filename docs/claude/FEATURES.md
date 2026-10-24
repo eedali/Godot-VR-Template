@@ -42,7 +42,7 @@ Rig placement legend — **L/R**: child of the left/right `XRController3D`
 | Feature | Toggle | XR Tools node | Status | Rig | Notes |
 |---|---|---|---|---|---|
 | Vignette (tunnelling) | `vignette` + `vignette_auto_adjust` | `effects/vignette.tscn` | addon | camera | Default on, auto-adjust on. |
-| Head-in-wall fade | `head_fade` | `XRToolsPlayerBody.head_behavior_mode` (Fade) | wired (default) | body | Expose as toggle (Fade vs Push-away vs Disabled). |
+| Head-in-wall fade | `head_behavior` | `XRToolsPlayerBody.head_behavior_mode` (Fade) | wired (default) | body | Expose as toggle (Fade vs Push-away vs Disabled). |
 | Player height calibration | `height_calibration` | `XRToolsPlayerBody.player_calibrate_height` | wired | body | |
 | Snap turn user setting | — | `XRToolsUserSettings.snap_turning` | addon | — | Shown in Options pane (Phase 5). |
 | Loading-screen fade & "hold to continue" | — | `staging/loading_screen.tscn` | wired | staging | `prompt_for_continue` toggle `loading_prompt`. |

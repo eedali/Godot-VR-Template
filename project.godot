@@ -22,6 +22,7 @@ config/icon="res://icon.png"
 [autoload]
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
+VRFeatures="*res://components/system/vr_features.gd"
 GameState="*res://game/game_state.tscn"
 XRToolsRumbleManager="*uid://by853dk86g1qw"
 
@@ -67,6 +68,10 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_environment="res://default_env.tres"
+
+[vr_template]
+
+feature_config="res://config/vr_features_default.tres"
 
 [xr]
 
