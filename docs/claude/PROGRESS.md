@@ -14,7 +14,7 @@ every "done" must name the log file or command that proved it.
 | 4 Mechanics & components | done | (this) | `bash tools/check.sh --run` -> ALL CHECKS PASSED: smoke (43 rig paths, every setting handled), zone test x3 (default / `--set=all_on` / minimal + `remove_disabled_nodes`) in `build/claude-logs/zones*.log`; passthrough without XR -> only `WARNING: PassthroughController: no active XR interface` | review findings 1-8 fixed |
 | 5 Showcase & menu | done | (this) | `bash tools/check.sh --run` -> ALL CHECKS PASSED; `zones.log`: showcase loads in all 3 configs, "wrist menu -> showcase ok", "start menu -> showcase ok"; zone database has 4 zones; Options pane instances `user_settings_ui.tscn` (smoke test loads it) | 5 stations with live FeatureStatusLabels |
 | 6 Platform / export / CI | done | (this) | `bash tools/check.sh --export` -> PASS (`build/windows/Game.exe` 100 MB + `Game.pck` 16.6 MB, `export-windows.log`); exported `Game.console.exe --headless --xr-mode off --quit-after 300` exits 0 with no errors (`exported-run.log`); both workflows parse with `yaml.safe_load`, no tabs; GitHub Actions on this branch: see push log | export templates 4.6.stable present locally |
-| 7 Docs | todo | | | |
+| 7 Docs | done | (this) | relative-link check over README.md + docs/*.md: no broken links; `bash tools/check.sh` green | README rewritten; FEATURES, HOWTO_TOGGLE, HOWTO_NEW_GAME, CHANGELOG, VERSIONS entry |
 | 8 Final verification & push | todo | | | |
 
 Status values: `todo` · `in progress` · `done` · `blocked (<reason>)` · `partial (<what is missing>)`

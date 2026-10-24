@@ -125,12 +125,37 @@ body = `PlayerBody`, zone = must also be placed in the zone scene).
 |---|---|---|
 | `remove_disabled_nodes` | off | Free the nodes of disabled features at startup instead of disabling them |
 
-## 4. Adding a new toggle
+## 4. Zone content tied to a toggle
 
-1. Add an `@export var my_feature : bool = …` to `config/vr_feature_config.gd`
+Rig features are handled by the `PlayerRig`. For things that live in a zone,
+use the helpers in `components/system/`:
+
+- **`FeatureGate`** (child node): hides and disables its parent while a
+  feature is off (bodies and areas leave the physics simulation), follows
+  runtime changes, optional `invert` / `free_when_off`. The virtual keyboard
+  prefab uses it with `feature = &"virtual_keyboard"`.
+- **`FeatureToggleButton`** (child node): flips a feature when a button is
+  pressed (`XRToolsInteractableAreaButton.button_pressed` or a 2D button's
+  `pressed`). The showcase kiosk uses it for passthrough / debug HUD / vignette.
+- **`FeatureStatusLabel`** (a `Label3D`): shows the live on/off state of a list
+  of features.
+
+Rules the rig applies on top of the raw values (see `PlayerRig` docs):
+movement features are forced off while `player_body` is off (one warning is
+logged), the left-hand crouch is off while `flight` is on, and the left-hand
+teleport pauses while the left pointer is on a target or the left hand holds
+something. `PlayerRig.is_feature_active(name)` returns the effective state.
+
+## 5. Adding a new toggle
+
+1. Add an `@export var my_feature : bool = ...` to `config/vr_feature_config.gd`
    in the right group, and the value to `config/vr_features_default.tres`.
 2. Add the name to `REQUIRED_FEATURES` in `tools/smoke_test.gd` and a row to
    `docs/FEATURES.md`.
-3. Add the node path(s) to `FEATURE_NODES` in
-   `components/player/player_rig.gd` (or a special-case handler).
-4. `bash tools/check.sh` — the smoke test fails if a path does not exist.
+3. Tell the rig about it, one of:
+   - node(s) to switch → `FEATURE_NODES` in `components/player/player_rig.gd`;
+   - a property to change → `SETTING_NODES` + a `match` branch in `_apply_setting`;
+   - handled elsewhere → `EXTERNAL_FEATURES` with a note where.
+4. `bash tools/check.sh --run` — the smoke test fails if a path does not
+   exist or a setting is handled nowhere; the game-flow test loads every zone
+   with the feature on and off.

@@ -199,7 +199,7 @@ Options pane shows the settings UI.
 - [x] 6.4 `bash tools/check.sh --export` → `build/windows/Game.exe` produced.
       If export templates are missing, note it in `PROGRESS.md` (the user can
       install them from the editor) and do not fail the phase on that alone.
-- [ ] 6.5 Commit, push.
+- [x] 6.5 Commit, push.
 
 **Acceptance:** Windows debug export succeeds (or templates confirmed missing);
 CI YAML passes `yamllint`-level sanity (valid YAML, no tabs).
@@ -208,19 +208,19 @@ CI YAML passes `yamllint`-level sanity (valid YAML, no tabs).
 
 ## Phase 7 — Documentation (`docs:`)
 
-- [ ] 7.1 Rewrite `README.md` (English): what the template is, feature list
+- [x] 7.1 Rewrite `README.md` (English): what the template is, feature list
       (link `docs/FEATURES.md`), quick start (PC + Quest), the one-config toggle
       story, folder layout, how to make a new game (link), credits/licence.
       Keep the useful operational notes from the current README (vendors,
       Android template, logs).
-- [ ] 7.2 `docs/FEATURES.md` — user-facing version of the matrix (toggle, what,
+- [x] 7.2 `docs/FEATURES.md` — user-facing version of the matrix (toggle, what,
       default, headset-tested? column).
-- [ ] 7.3 `docs/HOWTO_NEW_GAME.md` — checklist: copy config, set `starting_zone`,
+- [x] 7.3 `docs/HOWTO_NEW_GAME.md` — checklist: copy config, set `starting_zone`,
       package name/product name keys, icon/splash, keystore, per-platform knobs.
-- [ ] 7.4 `docs/HOWTO_TOGGLE.md` (from Phase 2) — final pass.
-- [ ] 7.5 `VERSIONS.md` / `docs/CHANGELOG.md` — add an entry for this overhaul
+- [x] 7.4 `docs/HOWTO_TOGGLE.md` (from Phase 2) — final pass.
+- [x] 7.5 `VERSIONS.md` / `docs/CHANGELOG.md` — add an entry for this overhaul
       (XR Tools 4.5.2, feature config, rig, showcase).
-- [ ] 7.6 Commit, push.
+- [x] 7.6 Commit, push.
 
 **Acceptance:** a newcomer can go from clone to a toggled, exported build using
 only the docs.
