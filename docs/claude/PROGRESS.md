@@ -10,7 +10,7 @@ every "done" must name the log file or command that proved it.
 | 0 Setup & baseline | done | ae0cb83, (this) | `build/claude-logs/` baseline above | gdlint present; vendors 4.3.0 installed |
 | 1 Audit fixes | done | d15845b, (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED (`build/claude-logs/run.log`) | A6 skipped (`[~]`, D-4); gdlint now clean |
 | 2 Feature config | done | (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED; smoke log `VRFeatureConfig exposes 44 settings`; headless probe: `VRFeatures.is_enabled(&"teleport") == true`, `set_value(&"teleport", 0)` → false, unknown name → warning | 44 settings |
-| 3 PlayerRig refactor | todo | | | |
+| 3 PlayerRig refactor | done | 8879e3e, (this) | `bash tools/check.sh --run` → ALL CHECKS PASSED incl. new `tools/zone_load_test.gd` (start scene → new game → all 3 zones, runtime toggle, save) `build/claude-logs/zones.log`; startup toggle proven with a temporary `direct_movement = false` config (`zones-direct-off.log`: `VRFeatures: direct_movement -> off (MovementDirect)` ×2 at zone load) | see node counts below |
 | 4 Mechanics & components | todo | | | |
 | 5 Showcase & menu | todo | | | |
 | 6 Platform / export / CI | todo | | | |
@@ -40,6 +40,21 @@ is deprecated` (upstream visual shader), `ObjectDB instances leaked at exit`.
 The first baseline run (without `--xr-mode off`) popped up a blocking Windows
 "OpenXR was requested but failed to start" alert on the user's screen; the check
 script now passes `--xr-mode off` to every step that runs the project (D-2).
+
+## Phase 3 — zone node counts (3.5)
+
+`grep '^\[node'` before (HEAD~) / after the rewrite. Every dropped node was a
+rig override (`parent="XROrigin3D/..."`: 2× Skeleton3D bone poses,
+2× BoneAttachment3D transforms, 2× AnimationTree blend-tree copies, identical
+to the rig's own values); the list of content nodes is byte-identical
+(`diff` of the non-rig `[node` lines is empty).
+
+| Zone | nodes before | nodes after | rig overrides dropped | lines before → after |
+|---|---|---|---|---|
+| outside_zone.tscn | 48 | 42 | 6 | 328 → 208 |
+| house_interior_zone.tscn | 87 | 81 | 6 | 515 → 395 |
+| house_back_yard_zone.tscn | 41 | 35 | 6 | 292 → 172 |
+| zone_base.tscn | 47 (rig inline) | 2 (root + rig instance) | — | 281 → 9 |
 
 ## Blockers
 

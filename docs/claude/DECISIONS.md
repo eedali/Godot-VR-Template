@@ -103,3 +103,38 @@ Context: today the first scene load shows "hold to continue" and
 Decision: `loading_prompt = true` keeps the prompt on every load;
 false (default) is today's behaviour (first load only).
 Reversible: yes.
+
+### D-9 — `collision_hands` off = XR Tools TELEPORT mode, no re-parenting   (phase 3, 2026-10-24)
+Context: ARCHITECTURE §3 suggested re-parenting the hand subtree under the
+controller when collision hands are off.
+Decision: `XRToolsCollisionHand` already has `mode` (DISABLED / TELEPORT /
+COLLIDE); off sets `TELEPORT` (the body snaps to the controller every physics
+frame, never collides), on restores `COLLIDE`. No node moves, so every
+`FEATURE_NODES` path stays valid and the toggle works at runtime.
+Alternatives: re-parent (breaks node paths, persistence lookups and runtime
+re-enable).
+Reversible: yes.
+
+### D-10 — Hand models renamed `LeftHandModel` / `RightHandModel`   (phase 3, 2026-10-24)
+Context: in zone_base the hand mesh instance under `CollisionHandLeft` was
+also called `LeftHand`, giving paths like `LeftHand/CollisionHandLeft/LeftHand`.
+Decision: rename to `LeftHandModel` / `RightHandModel` (as ARCHITECTURE §3
+draws it). Nothing looked the mesh up by name (XR Tools searches by class).
+Reversible: yes.
+
+### D-11 — `hand_models` off hides the mesh and stops its AnimationTree only   (phase 3, 2026-10-24)
+Context: the poke and the collision-hand finger shapes live under the hand
+model's skeleton; `process_mode = DISABLED` on the model would freeze them.
+Decision: special handler: `visible = false` + `AnimationTree.active = false`;
+the node keeps processing. `remove_disabled_nodes` never frees hand models or
+the player body (`NEVER_FREE`; GameState needs the body to save).
+Reversible: yes.
+
+### D-12 — Headless zone-load test added to `check.sh --run`   (phase 3, 2026-10-24)
+Context: PLAN 3.6 asks to confirm the start menu → zone path has no script
+error; `--quit-after` on the main scene never leaves the start menu.
+Decision: `tools/zone_load_test.gd` drives the real flow (presses continue,
+`GameState.new_game()`, loads every zone in the database, toggles a feature at
+runtime, saves) and is part of `--run`. It is duck-typed because `--script`
+compiles it before autoloads are registered.
+Reversible: yes — drop the block from `tools/check.sh`.

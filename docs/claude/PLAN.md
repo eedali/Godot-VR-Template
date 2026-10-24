@@ -101,12 +101,12 @@ after 3.6 separately.
       logic; implement the special cases listed in `ARCHITECTURE.md §3`.
 - [x] 3.3 Extend `tools/smoke_test.gd`: instantiate the rig and assert every
       `FEATURE_NODES` path exists (`has_node`). Check green. **Commit.**
-- [ ] 3.4 Rewrite `game/zones/zone_base.tscn` as a non-inheriting scene with
+- [x] 3.4 Rewrite `game/zones/zone_base.tscn` as a non-inheriting scene with
       the rig instanced as `XROrigin3D` (see inheritance constraint).
-- [ ] 3.5 Rewrite the three demo zones to drop the copied rig overrides and keep
+- [x] 3.5 Rewrite the three demo zones to drop the copied rig overrides and keep
       only content. Diff the node lists before/after (`grep '^\[node' file`)
       to prove no content node was lost; record the counts in `PROGRESS.md`.
-- [ ] 3.6 `bash tools/check.sh --run` green; also run the headless main scene
+- [x] 3.6 `bash tools/check.sh --run` green; also run the headless main scene
       and confirm the start menu → zone load path has no `SCRIPT ERROR`.
       **Commit, push.**
 - [ ] 3.7 Run the `godot-reviewer` subagent on `git diff main...HEAD -- components game`

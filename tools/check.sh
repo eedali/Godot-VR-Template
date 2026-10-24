@@ -3,6 +3,7 @@
 #
 #   bash tools/check.sh            import + smoke test (scripts, scenes, resources) (+ gdlint if installed)
 #   bash tools/check.sh --run      ... + run the main scene headless for a few seconds
+#                                  + zone load test (start menu -> new game -> every zone)
 #   bash tools/check.sh --export   ... + Windows debug export
 #
 # Exit code 0 means every mandatory check passed. Logs: build/claude-logs/
@@ -84,6 +85,16 @@ if [ "$DO_RUN" -eq 1 ]; then
 		fail "headless run hit script errors (see $LOGS/run.log)"
 	else
 		pass "headless run (desktop fallback, OpenXR init failure is expected)"
+	fi
+
+	# Real game flow: start scene -> new game -> every zone in the database
+	if timeout 300 $GODOT $RUN_FLAGS --path . --script res://tools/zone_load_test.gd > "$LOGS/zones.log" 2>&1 \
+			&& ! grep -E -q "SCRIPT ERROR|Parse Error" "$LOGS/zones.log"; then
+		grep -E "zone_load_test:" "$LOGS/zones.log" || true
+		pass "zone load test (start menu -> new game -> all zones)"
+	else
+		grep -E "FAIL:|zone_load_test:|SCRIPT ERROR" -A3 "$LOGS/zones.log" | head -60
+		fail "zone load test (see $LOGS/zones.log)"
 	fi
 fi
 
