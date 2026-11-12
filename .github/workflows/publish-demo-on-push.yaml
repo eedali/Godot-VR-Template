@@ -8,7 +8,7 @@ name: Publish Demo
 
 # Trigger rules (adjust to configure when CI is performed)
 on:
-  [push, pull_request]
+  workflow_dispatch:
 
 
 # Environment variables
